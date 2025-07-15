@@ -16,11 +16,13 @@ const { getAllUserLeaves } = require("../controller/Leave");
 
 // USER ENDPOINTS
 const { getAllUsers } = require("../controller/User");
+const { logout } = require('../controller/auth');
 
 // AUTH ROUTES
 router.post("/signup", signup);
 router.post("/login", login);
 // router.get("/dashboard", auth, getAllLeaves);
+router.post('/logout', logout);
 
 // FILE ROUTES
 router.post("/imageUpload", imageUpload);
