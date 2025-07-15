@@ -2,47 +2,75 @@ const User = require("../model/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+
 exports.login = async (req, res) => {
     try {
-        //fetch the data from the req body;
+        // 1. Validate Input
         const { email, password } = req.body;
-        //check user already exist in the database or not
-        const response = await User.findOne({ email: email });
-
-        if (!response) {
-            return res.status(400).json({ message: "User does not exist" });
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and password are required",
+            });
         }
-        const playload = {
-            email: response.email,
-            id: response._id,
-            accountType: response.accountType,
+
+        // 2. Find User
+        const user = await User.findOne({ email }).select("+password");
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+        }
+
+        // 3. Verify Password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials",
+            });
+        }
+
+        // 4. Generate JWT Token
+        const payload = {
+            id: user._id,
+            email: user.email,
+            accountType: user.accountType,
         };
-        if (await bcrypt.compare(password, response.password)) {
-            const token = jwt.sign(playload, process.env.JWT_SECRET, {
-                expiresIn: "7d",
-            });
-            console.log(token);
-            const olderUser = response.toObject();
-            olderUser.token = token;
-            olderUser.password = undefined;
-            console.log(olderUser);
-            const option = {
-                expiresIn: new Date(Date.now() + 3 * 60 * 60 * 1000),
-                httpsOnly: true,
-            };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "7d",
+        });
 
-            return res.cookie("token", token, option).status(200).json({
-                message: "login successfully",
-                success: true,
-                token: token,
-                user: olderUser,
-            });
-        } else {
-            return res.status(404).json({ message: "password is not match" });
-        }
+        // 5. Secure Response
+        const sanitizedUser = {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            accountType: user.accountType,
+        };
+
+        // 6. Set HTTP-Only Cookie
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+        });
+
+        return res.status(200).json({
+            success: true,
+            token,
+            user: sanitizedUser,
+            message: "Login successful",
+        });
     } catch (error) {
-        return res
-            .status(500)
-            .json({ message: "internal server error", error: error });
+        console.error("Login error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
     }
 };
