@@ -20,7 +20,7 @@ const Navbar = () => {
         <div className="h-[3.5rem] bg-[rgb(252,101,1)] border-b border-[rgb(242,90,0)]">
             <div className="h-full w-11/12 mx-auto flex justify-between items-center">
                 <div className="text-2xl font-bold salsa text-gray-100">
-                    Staff Leave
+                    Staff Leave Portal
                 </div>
                 <div>
                     {token ? (

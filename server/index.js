@@ -1,39 +1,32 @@
-const express=require('express');
-const {conectDB}=require('./config/database');
-const {cloudinaryConfig}=require('./config/cloudinary');
-const fileUpload=require('express-fileupload');
+const express = require('express');
+const { connectDB } = require('./config/database'); // Fixed typo
+const { cloudinaryConfig } = require('./config/cloudinary');
+const fileUpload = require('express-fileupload');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
-
-const app=express();
+const app = express();
 require("dotenv").config();
-const port=process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
-// Use the cookie-parser middleware
-app.use(cookieParser());
-
-//port listening
-app.listen(port,()=>{
-    console.log(`Server is running on port ${port}`);
-})    
-//middleware
+// Middleware (must come before routes)
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 app.use(fileUpload({
-    useTempFiles:true,
-    tempFileDir:'/tmp/'
+    useTempFiles: true,
+    tempFileDir: '/tmp/'
+}));
 
-})); 
-
-//routes mounting
-const routes=require('./router/router');
-app.use('/api/v1',routes);
-
-//connection with file database
-conectDB();
-
-//cloudinary configuration
+// Database connections
+connectDB(); // Fixed function name
 cloudinaryConfig();
 
-//authDatabase
+// Routes mounting
+const routes = require('./router/router');
+app.use('/api/v1', routes); // All routes now under /api/v1
+
+// Start server (should be last)
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
