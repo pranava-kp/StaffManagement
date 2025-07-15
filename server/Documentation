@@ -1,0 +1,24 @@
+Documentation
+
+# Create test user
+curl -X POST http://localhost:2000/api/v1/signup \
+  -H "Content-Type: application/json" \
+  -d '{"firstName":"Temp","lastName":"User","email":"temp@example.com"}' \
+  -c cookies.txt
+
+# Login test
+curl -X POST http://localhost:2000/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"temp@example.com","password":"Temp@123"}' \
+  -c cookies.txt
+
+# A cookies.txt file must be generated and should countain a Auth Bearer Token
+
+#GetAllUsers Call
+curl -X GET http://localhost:2000/api/v1/getAllUser \
+  -H "Authorization: Bearer TOKEN"
+
+# Logout test
+curl -X POST http://localhost:2000/api/v1/logout \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json"

@@ -1,4 +1,5 @@
 const File=require('../model/file');
+const folder = process.env.CLOUDINARY_FOLDER || 'temp_uploads';
 const coludinary=require('cloudinary').v2;
 
 exports.LocalFileUpload=async(req,res)=>{
