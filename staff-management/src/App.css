@@ -1,0 +1,39 @@
+*{
+  font-family: 'Poppins', sans-serif;
+}
+
+.patternBackground{
+    background-image: url(../src/assets/images/pattern.svg);
+}
+.salsa{
+    font-family: 'Salsa', cursive;
+}
+.loading-spinner {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+}
+.loading-spinner:after {
+  content: " ";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  border-color: #fff transparent #fff transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background-image: url('./assets//images//calendarIcon.svg');
+}
