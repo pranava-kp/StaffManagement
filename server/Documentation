@@ -27,3 +27,29 @@ curl -X GET http://localhost:2000/api/v1/getAllUser \
 curl -X POST http://localhost:2000/api/v1/logout \
   -H "Authorization: Bearer TOKEN" \
   -H "Content-Type: application/json"
+
+
+
+
+# Resetting Passwords
+# There are 2 way through which password can be reset
+# 1. OTP Autentication (Forgot Password)
+curl -X POST http://localhost:2000/api/v1/generate-otp \
+-H "Content-Type: application/json" \
+-d '{"email": "pranavakp2004@gmail.com"}'
+
+
+curl -X POST http://localhost:2000/api/v1/verify-otp \
+-H "Content-Type: application/json" \
+-d '{"email": "pranavakp2004@gmail.com", "otp": "495937"}'
+
+curl -X POST http://localhost:2000/api/v1/reset-password-with-otp \
+-H "Content-Type: application/json" \
+-d '{"email": "pranavakp2004@gmail.com", "newPassword": "87654321"}'
+
+# 2.Change Password for Authenticated Users 
+curl -X POST http://localhost:2000/api/v1/change-password -H "Content-Type: application/json" -d '{
+"email": "pranavakp2004@gmail.com",
+"currentPassword": "12345678",
+"newPassword": "87654321"
+}'

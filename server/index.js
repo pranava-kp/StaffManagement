@@ -25,13 +25,13 @@ app.use(fileUpload({
   tempFileDir: '/tmp/'
 }));
 
-// Routes
-const routes = require('./router/router');
-app.use('/api/v1', routes);
-
 // Database & Cloudinary
 connectDB();
 cloudinaryConfig();
+
+// Routes
+const routes = require('./router/router');
+app.use('/api/v1', routes); // This prefixes all routes with /api/v1
 
 // Server Start
 app.listen(port, () => {
