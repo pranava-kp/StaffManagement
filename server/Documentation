@@ -3,13 +3,18 @@ Documentation
 # Create test user
 curl -X POST http://localhost:2000/api/v1/signup \
   -H "Content-Type: application/json" \
-  -d '{"firstName":"Temp","lastName":"User","email":"temp@example.com"}' \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "password": "securePassword123"
+}' \
   -c cookies.txt
 
 # Login test
 curl -X POST http://localhost:2000/api/v1/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"temp@example.com","password":"Temp@123"}' \
+  -d '{"email":"john.doe@example.com","password":"securePassword123"}' \
   -c cookies.txt
 
 # A cookies.txt file must be generated and should countain a Auth Bearer Token

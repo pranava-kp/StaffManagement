@@ -25,6 +25,7 @@ function LoginForm() {
 
     const handleOnSubmit = (e) => {
         e.preventDefault();
+        // console.log("Submitting:", { email, password });
         dispatch(login(email, password, navigate));
     };
 
