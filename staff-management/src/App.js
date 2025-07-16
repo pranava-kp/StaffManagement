@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Navbar from "./components/common/Navbar";
@@ -15,11 +15,15 @@ import Setting from "./components/core/Dashboard/Setting/Index";
 import Staff from "./components/core/Dashboard/Staff/Index";
 
 function App() {
-    const user = {accountType:"Staff"}
+    const user = { accountType: "Staff" };
+    
     return (
-        <div>
+        <div className="flex flex-col min-h-screen">
             <Navbar />
             <Routes>
+                {/* Redirect root path to /login */}
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                
                 <Route
                     path="/login"
                     element={
@@ -43,37 +47,26 @@ function App() {
                         </PrivateRoute>
                     }
                 >
-                    <Route
-                        path="/dashboard/my-profile"
-                        element={<MyProfile />}
-                    />
-                    <Route path="/dashboard/settings" element={<Setting/>} />
+                    <Route path="/dashboard/my-profile" element={<MyProfile />} />
+                    <Route path="/dashboard/settings" element={<Setting />} />
+                    
                     {user?.accountType === ACCOUNT_TYPE.STAFF && (
                         <>
-                            <Route
-                                path="/dashboard/new-leave"
-                                element={<NewLeave />}
-                            />
-                            <Route
-                                path="/dashboard/staff"
-                                element={<Staff />}
-                            />
+                            <Route path="/dashboard/new-leave" element={<NewLeave />} />
+                            <Route path="/dashboard/staff" element={<Staff />} />
                         </>
                     )}
 
                     {user?.accountType === ACCOUNT_TYPE.STAFF && (
                         <>
-                            <Route
-                                path="/dashboard/add-staff"
-                                element={<AddStaff />}
-                            />
-                            <Route
-                                path="/dashboard/all-staffs"
-                                element={<AllStaffs />}
-                            />
+                            <Route path="/dashboard/add-staff" element={<AddStaff />} />
+                            <Route path="/dashboard/all-staffs" element={<AllStaffs />} />
                         </>
                     )}
                 </Route>
+                
+                {/* Optional: Add a catch-all route for 404 pages */}
+                <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </div>
     );
