@@ -9,7 +9,7 @@ exports.getAllUsers = async (req, res)=>{
             const { password, ...rest } = userObject;
             return rest;
           });
-          console.log("modified user details: ", usersDataWithoutPassword)
+          console.log("All user details: ", usersDataWithoutPassword)
         return res.status(200).json({
             message:"All users data fetched successfully",
             data:{
