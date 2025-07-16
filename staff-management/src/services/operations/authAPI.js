@@ -10,7 +10,6 @@ export function signUp(
     lastName,
     email,
     password,
-    confirmPassword,
     navigate
 ) {
     return async (dispatch) => {
@@ -22,13 +21,13 @@ export function signUp(
                 lastName,
                 email,
                 password,
-                confirmPassword,
             });
 
             if (!response.data.success) {
                 throw new Error(response.data.message);
             }
             toast.success("Signup Successful");
+            navigate("/login");
         } catch (error) {
             toast.error("Signup Failed");
             console.log(error);

@@ -34,20 +34,17 @@ function SignupForm() {
     const handleOnSubmit = (e) => {
         e.preventDefault();
 
+        if (password.length < 8) {
+            toast.error("Password must be at least 8 characters");
+            return;
+        }
+
         if (password !== confirmPassword) {
             toast.error("Passwords Do Not Match");
             return;
         }
-        dispatch(
-            signUp(
-                firstName,
-                lastName,
-                email,
-                password,
-                confirmPassword,
-                navigate
-            )
-        );
+
+        dispatch(signUp(firstName, lastName, email, password, navigate));
 
         // Reset
         setFormData({
