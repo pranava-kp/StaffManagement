@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { login } from "../../../services/operations/authAPI";
 
 function LoginForm() {
@@ -25,7 +25,6 @@ function LoginForm() {
 
     const handleOnSubmit = (e) => {
         e.preventDefault();
-        // console.log("Submitting:", { email, password });
         dispatch(login(email, password, navigate));
     };
 
@@ -80,12 +79,14 @@ function LoginForm() {
                     )}
                 </span>
                 <div className="w-full flex justify-end">
-                    <div className=" max-w-max">
-                        <Link to="/forgot-password">
-                            <p className="mt-1 ml-auto max-w-max text-xs text-blue-800">
-                                Forgot Password
-                            </p>
-                        </Link>
+                    <div className="max-w-max">
+                        <button
+                            type="button"
+                            onClick={() => navigate("/forgot-password")}
+                            className="mt-1 ml-auto max-w-max text-xs text-blue-800 hover:underline"
+                        >
+                            Forgot Password
+                        </button>
                     </div>
                 </div>
             </label>

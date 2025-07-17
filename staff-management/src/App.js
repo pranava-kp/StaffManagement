@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/Forgot"; // Add this import
 import Navbar from "./components/common/Navbar";
 import Dashboard from "./pages/Dashboard";
 import OpenRoute from "./components/core/Auth/OpenRoute";
@@ -37,6 +38,15 @@ function App() {
                     element={
                         <OpenRoute>
                             <Signup />
+                        </OpenRoute>
+                    }
+                />
+                {/* Add this new route */}
+                <Route
+                    path="/forgot-password"
+                    element={
+                        <OpenRoute>
+                            <ForgotPassword />
                         </OpenRoute>
                     }
                 />
