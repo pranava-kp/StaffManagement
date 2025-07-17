@@ -3,3 +3,5 @@ server/.env
 cookies.txt
 staff-management/playground.js
 server/playground.js
+server/.env
+staff-management/.env
