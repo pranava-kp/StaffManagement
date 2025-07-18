@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast";
 function ForgotPassword() {
   const navigate = useNavigate();
   // step: 1 = Email input, 2 = OTP input, 3 = New Password input
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email: "",
     otp: "",
@@ -30,17 +30,19 @@ function ForgotPassword() {
   const sendOtp = async () => {
     setLoading(true);
     try {
-      // API call to generate OTP
       const res = await apiConnector("POST", endpoints.GENERATE_OTP, { email });
       if (!res.data.success) throw new Error(res.data.message);
-      toast.success("OTP sent to your email 📩");
-      setStep(2); // Move to OTP verification step
+      toast.success("OTP sent to your email");
+      setStep(2);
     } catch (err) {
-      toast.error(err.message || "Failed to send OTP");
+      const errorMessage =
+        err.response?.data?.message || err.message || "Failed to send OTP";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
 
   // Function to verify the entered OTP
   const verifyOtp = async () => {
@@ -75,7 +77,7 @@ function ForgotPassword() {
       // Replace with your actual backend endpoint for password reset
       const res = await apiConnector(
         "POST",
-        `${process.env.REACT_APP_BASE_URL}/reset-password-with-otp`, 
+        `${process.env.REACT_APP_BASE_URL}/reset-password-with-otp`,
         { email, otp, newPassword, confirmNewPassword }
       );
       if (!res.data.success) throw new Error(res.data.message);
@@ -122,12 +124,12 @@ function ForgotPassword() {
               value={email}
               onChange={handleOnChange}
               placeholder="Enter your registered email"
+              readOnly={step === 2 || step === 3}
+              className={`w-full rounded-[0.5rem] bg-richblack-800 p-[12px] text-black placeholder:text-gray-500 transition-opacity duration-300 ${step === 2 || step === 3 ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               style={{
                 boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
               }}
-              className="w-full rounded-[0.5rem] bg-richblack-800 p-[12px] text-black"
-              // Email field is read-only when in OTP or Reset Password step
-              readOnly={step === 2 || step === 3} 
             />
           </label>
 
@@ -135,7 +137,7 @@ function ForgotPassword() {
           {step === 2 && (
             <label className="w-full">
               <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-gray-950">
-                Verification Code <sup className="text-pink-500">*</sup>
+                One Time Password <sup className="text-pink-500">*</sup>
               </p>
               <input
                 required
@@ -143,7 +145,7 @@ function ForgotPassword() {
                 name="otp"
                 value={otp}
                 onChange={handleOnChange}
-                placeholder="Enter verification code"
+                placeholder="Enter OTP"
                 style={{
                   boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
                 }}
@@ -229,8 +231,8 @@ function ForgotPassword() {
                     setStep(1); // Go back to email from OTP step
                   } else if (step === 3) {
                     // Go back to email from password reset step and clear password fields
-                    setStep(1); 
-                    setFormData((prev) => ({ 
+                    setStep(1);
+                    setFormData((prev) => ({
                       ...prev,
                       otp: "",
                       newPassword: "",
@@ -256,12 +258,12 @@ function ForgotPassword() {
                 ? "Sending..."
                 : "Send OTP"
               : step === 2
-              ? loading
-                ? "Verifying..."
-                : "Verify Code"
-              : loading
-              ? "Resetting..."
-              : "Change Password"}
+                ? loading
+                  ? "Verifying..."
+                  : "Verify Code"
+                : loading
+                  ? "Resetting..."
+                  : "Change Password"}
           </button>
         </form>
       </div>
