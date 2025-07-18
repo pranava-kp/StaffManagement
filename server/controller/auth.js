@@ -2,10 +2,24 @@ const User = require('../model/user');
 const OTP = require('../model/otpModel');
 const mailSender = require('../utils/mailSender');
 const bcrypt = require('bcrypt');
-// const BlacklistedToken = require('../model/BlacklistedToken');
+const BlacklistedToken = require('../model/BlacklistedToken');
 
 exports.logout = async (req, res) => {
     try {
+        const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: 'No token provided'
+            });
+        }
+
+        // Add token to blacklist
+        const blacklistedToken = new BlacklistedToken({ token });
+        await blacklistedToken.save();
+
+        // Clear the cookie
         res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
