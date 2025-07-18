@@ -1,8 +1,8 @@
 const Department = require("../model/department");
 const Leave = require("../model/leave");
-const Profile = require("../models/Profile");
-const User = require("../models/User");
-const File = require("../models/File");
+const Profile = require("../model/profile");
+const User = require("../model/user");
+const File = require("../model/file");
 const { uploadFileToCloudinary } = require("../utils/fileUploader");
 
 //Updating Profile info
@@ -207,6 +207,34 @@ exports.updateDisplayPicture = async (req, res) => {
             success: false,
             message: "Error in image upload",
             error: error.message,
+        });
+    }
+};
+exports.getMyProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .populate('department', 'name')
+            .populate('additionalDetails')
+            .select('-password -token');
+        
+        res.status(200).json({
+            success: true,
+            profileData: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phoneNumber: user.additionalDetails?.phoneNumber,
+                employeeId: user.employeeId,
+                department: user.department?.name,
+                accountType: user.accountType,
+                hiringDate: user.hiringDate
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch profile",
+            error: error.message
         });
     }
 };

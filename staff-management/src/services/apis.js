@@ -6,6 +6,7 @@ export const endpoints = {
     SIGNUP_API: BASE_URL + "/signup",
     LOGIN_API: BASE_URL + "/login",
     GENERATE_OTP: BASE_URL + "/generate-otp",
+    PROFILE_API: "/profile",
 };
 
 // PROFILE IMAGE ENDPOINTS

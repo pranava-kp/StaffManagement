@@ -53,3 +53,13 @@ curl -X POST http://localhost:2000/api/v1/change-password -H "Content-Type: appl
 "currentPassword": "12345678",
 "newPassword": "87654321"
 }'
+
+# Getting individual profile details
+# 1. Using token value
+curl -X GET http://localhost:2000/api/v1/profile \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json"
+# 2. Using token stored in a file
+curl -X GET http://localhost:2000/api/v1/profile \
+  -b cookies.txt \
+  -H "Content-Type: application/json"

@@ -75,3 +75,22 @@ export function logout(navigate) {
         navigate("/login");
     };
 }
+
+export const getProfileData = async (token) => {
+    try {
+        const response = await apiConnector(
+            "GET",
+            endpoints.GET_PROFILE_API,
+            null,
+            {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            { withCredentials: true }
+        );
+        
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
