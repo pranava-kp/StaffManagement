@@ -4,6 +4,7 @@
 // import frameImg from "../../../assets/Images/frame.jpg"
 import LoginForm from "./LoginForm"
 import SignupForm from "./SignupForm"
+import ForgotPassword from "./ForgotPassword";
 import { BsPersonCircle } from "react-icons/bs";
 
 function Template({ title, description1, description2, image, formType }) {

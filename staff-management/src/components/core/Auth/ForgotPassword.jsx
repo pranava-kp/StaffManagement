@@ -5,7 +5,7 @@ import { endpoints } from "../../../services/apis";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
 
-function ForgotPassword() {
+export function ForgotPassword() {
     const navigate = useNavigate();
     const [step, setStep] = useState(1); // 1: email, 2: OTP
     const [formData, setFormData] = useState({
@@ -27,7 +27,7 @@ function ForgotPassword() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await apiConnector("POST", endpoints.SIGNUP_API + "/generateOTP", { email });
+            const response = await apiConnector("POST", endpoints.GENERATE_OTP , { email });
             
             if (!response.data.success) {
                 throw new Error(response.data.message);
@@ -46,7 +46,7 @@ function ForgotPassword() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await apiConnector("POST", endpoints.SIGNUP_API + "/verifyOTP", { email, otp });
+            const response = await apiConnector("POST", process.env.REACT_APP_BASE_URL+'/verify-otp', { email, otp });
             
             if (!response.data.success) {
                 throw new Error(response.data.message);
