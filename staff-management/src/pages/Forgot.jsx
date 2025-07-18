@@ -2,7 +2,7 @@ import React from 'react'
 import Template from "../components/core/Auth/Template"
 import ForgotPassword from "../components/core/Auth/ForgotPassword"
 
-const forgotPassword = () => {
+export const ForgotPwd = () => {
     return (
         <Template
           title="Reset Your Password"

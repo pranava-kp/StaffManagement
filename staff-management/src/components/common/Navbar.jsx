@@ -4,6 +4,8 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setToken } from "../../services/slices/authSlice";
 import { toast } from "react-hot-toast";
+import logo from '../../assets/images/rns-logo.webp'
+
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -19,6 +21,7 @@ const Navbar = () => {
     return (
         <div className="h-[3.5rem] bg-[rgb(252,101,1)] border-b border-[rgb(242,90,0)]">
             <div className="h-full w-11/12 mx-auto flex justify-between items-center">
+                <img src={logo} alt="RNS"/>
                 <div className="text-2xl font-bold salsa text-gray-100">
                     Staff Leave Portal
                 </div>
