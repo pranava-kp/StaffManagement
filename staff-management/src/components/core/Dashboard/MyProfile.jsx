@@ -54,9 +54,9 @@ const MyProfile = () => {
           <ProfileField label="First Name" value={profile.firstName} />
           <ProfileField label="Last Name" value={profile.lastName} />
           <ProfileField label="Email" value={profile.email} />
-          <ProfileField label="Phone" value={profile.phoneNumber || "Not provided"} />
+          <ProfileField label="Phone" value={profile.phone || "Not provided"} />
           <ProfileField label="Employee ID" value={profile.employeeId} />
-          <ProfileField label="Department" value={profile.department} />
+          <ProfileField label="Department" value={profile.department || "Not provided"} />
           <ProfileField label="Account Type" value={profile.accountType} />
           <ProfileField
             label="Profile Created on"
@@ -74,7 +74,7 @@ const ProfileField = ({ label, value }) => (
       {label}
     </label>
     <div className="px-4 py-2 min-w-[350px] bg-gray-300 border border-gray-300 rounded-md text-gray-700">
-      {value || "Not available"}
+      {(value !== null && value !== undefined) ? value : "Not available"}
     </div>
   </div>
 );

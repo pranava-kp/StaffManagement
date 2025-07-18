@@ -33,8 +33,9 @@ const userSchema = new mongoose.Schema(
             default: Date.now,
         },
         department: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Department",
+            type: String,
+            enum: ["CSE", "ISE", "ME", "ECE"],
+            default: null
         },
         token: {
             type: String,
@@ -42,15 +43,12 @@ const userSchema = new mongoose.Schema(
         expiryTime: {
             type: Date,
         },
-        phone: {
+        phone: String,
+        gender: {
             type: String,
+            enum: ["Male", "Female", "Other"],
         },
-        employeeId: {
-            type: String,
-            default: null,  // Explicitly set default to null
-            // required: true,  // Commented out as per your original
-            // unique: true,     // Commented out as per your original
-        },
+        employeeId: String
     },
     { timestamps: true }
 );

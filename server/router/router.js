@@ -16,6 +16,7 @@ const { imageUpload, getAllFiles } = require("../controller/File");
 const { createLeave, getAllUserLeaves } = require("../controller/Leave");
 const { getAllUsers } = require("../controller/User");
 const { getMyProfile } = require("../controller/Profile");
+const { updateOwnProfile, adminUpdateProfile } = require("../controller/Profile");
 
 // AUTH ROUTES
 router.post("/signup", signup);
@@ -39,5 +40,7 @@ router.get("/getAllUserLeaves", auth, isStaff, getAllUserLeaves);
 // USER ROUTES
 router.get("/profile", auth, getMyProfile);
 router.get("/getAllUser", auth, getAllUsers);
+router.patch("/update-own-profile", auth, isStaff, updateOwnProfile);          // For staff
+router.patch("/admin-update-profile", auth, adminUpdateProfile);    // For Principal
 
 module.exports = router;

@@ -6,76 +6,62 @@ const File = require("../model/file");
 const { uploadFileToCloudinary } = require("../utils/fileUploader");
 
 //Updating Profile info
-exports.updateProfile = async (req, res) => {
-    try {
-        //Fetch data
-        const {
-            firstName,
-            lastName,
-            gender,
-            dateOfBirth = "",
-            about = "",
-            phoneNumber,
-        } = req.body;
+const jwt = require("jsonwebtoken");
+exports.updateOwnProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-        //Fetch User Id (coming from middleware, where we decoded JWT token)
-        const id = req.user.id;
-
-        //Validate data
-        if (!gender || !phoneNumber || !id || !firstName || !lastName) {
-            return res.status(400).json({
-                success: false,
-                message: "Please fill necessary fields",
-            });
-        }
-
-        //Retrieving Profile details by retrieving User details first
-        const userDetails = await User.findById(id);
-        userDetails.firstName = firstName;
-        userDetails.lastName = lastName;
-        const profileId = userDetails.additionalDetails;
-        const profileDetails = await Profile.findById(profileId);
-
-        //
-        //TODO: check code below if it works
-        //Retrieving profile id from user details using populate
-        //const profileDetails = await User.findById(id).populate("additionalDetails");
-        //
-
-        //Updating profile details
-        //1. First Method
-        // const updatedProfile = await Profile.findByIdAndUpdate(profileId, {
-        //     gender,
-        //     dateOfBirth,
-        //     about,
-        //     phoneNumber
-        // })
-        //2. Second Method
-        profileDetails.dateOfBirth = dateOfBirth;
-        profileDetails.about = about;
-        profileDetails.phoneNumber = phoneNumber;
-        profileDetails.gender = gender;
-        await userDetails.save();
-        await profileDetails.save();
-        const updatedUserDetails = await User.findById(id)
-            .populate("additionalDetails")
-            .exec();
-        updatedUserDetails.password = null;
-
-        //Success response
-        return res.status(200).json({
-            success: true,
-            message: "Profile updated successfully",
-            updatedUserDetails,
-        });
-    } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: "Unable to create Profile, internal error",
-            error: err.message,
-        });
+    if (req.user.accountType !== "Staff") {
+      return res.status(403).json({ success: false, message: "Only staff can access this route." });
     }
+
+    const { employeeId, phone, gender } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    if (employeeId) user.employeeId = employeeId;
+    if (phone) user.phone = phone;
+    if (gender) user.gender = gender;
+
+    await user.save();
+    return res.status(200).json({ success: true, message: "Profile updated", data: user });
+  } catch (err) {
+    console.error("Staff profile update failed:", err);
+    return res.status(500).json({ success: false, message: "Error updating profile", error: err.message });
+  }
 };
+
+exports.adminUpdateProfile = async (req, res) => {
+  try {
+    const requester = req.user;
+
+    if (requester.accountType !== "Principal") {
+      return res.status(403).json({ success: false, message: "Only principals can perform this operation." });
+    }
+
+    const { id, department, employeeId, phone, gender } = req.body;
+    if (!id) {
+      return res.status(400).json({ success: false, message: "Target user ID required" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ success: false, message: "Target user not found" });
+
+    if (department) user.department = department;
+    if (employeeId) user.employeeId = employeeId;
+    if (phone) user.phone = phone;
+    if (gender) user.gender = gender;
+
+    await user.save();
+    return res.status(200).json({ success: true, message: "User updated successfully", data: user });
+  } catch (err) {
+    console.error("Admin update failed:", err);
+    return res.status(500).json({ success: false, message: "Failed to update user", error: err.message });
+  }
+};
+
+
 
 //Delete Account
 exports.deleteProfile = async (req, res) => {
@@ -123,12 +109,6 @@ exports.deleteProfile = async (req, res) => {
 
         //Removing all leaves of the user
         await Leave.deleteMany({ user: id });
-
-        //Removing profile from Department
-        await Department.findOneAndUpdate(
-            { $pull: { staffs: id } },
-            { new: true }
-        );
 
         //Now we're deleting all details of the User
         await User.findByIdAndDelete(id);
@@ -211,30 +191,36 @@ exports.updateDisplayPicture = async (req, res) => {
     }
 };
 exports.getMyProfile = async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id)
-            .populate('department', 'name')
-            .populate('additionalDetails')
-            .select('-password -token');
-        
-        res.status(200).json({
-            success: true,
-            profileData: {
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                phoneNumber: user.additionalDetails?.phoneNumber,
-                employeeId: user.employeeId,
-                department: user.department?.name,
-                accountType: user.accountType,
-                hiringDate: user.hiringDate
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch profile",
-            error: error.message
-        });
+  try {
+    const user = await User.findById(req.user._id).select("-password -token");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      profileData: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        employeeId: user.employeeId,
+        gender: user.gender,
+        department: user.department,
+        accountType: user.accountType,
+        hiringDate: user.hiringDate,
+      },
+    });
+  } catch (error) {
+    console.error("Get profile failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch profile",
+      error: error.message,
+    });
+  }
 };
