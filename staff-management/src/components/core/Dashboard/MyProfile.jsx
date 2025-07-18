@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { getProfileData } from '../../../services/operations/profileAPI'; // Changed import path
+import { getProfileData } from '../../../services/operations/profileAPI';
 import { useSelector } from 'react-redux';
 
 const MyProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { token } = useSelector(state => state.auth); // Get token from Redux
+  const { token } = useSelector(state => state.auth);
+  
   const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  }).replace(/(\d+)\/(\w+)\/(\d+)/, '$1 $2 $3'); // Remove slashes
-};
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).replace(/(\d+)\/(\w+)\/(\d+)/, '$1 $2 $3');
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -45,10 +46,11 @@ const MyProfile = () => {
   if (!profile) return <div className="p-4">No profile data available</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">My Profile</h1>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="flex flex-col border bg-gray-100 gap-8 w-full rounded-md p-6">
+      <p className="border-b-2 w-full p-3 border-gray-300 text-xl font-semibold">My Profile</p>
+      
+      <div className="flex flex-col gap-4 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-[10%]">
           <ProfileField label="First Name" value={profile.firstName} />
           <ProfileField label="Last Name" value={profile.lastName} />
           <ProfileField label="Email" value={profile.email} />
@@ -67,9 +69,11 @@ const MyProfile = () => {
 };
 
 const ProfileField = ({ label, value }) => (
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
-    <div className="p-2 bg-gray-50 rounded-md border border-gray-200">
+  <div className="flex flex-col gap-1">
+    <label htmlFor={label} className="text-sm font-medium uppercase text-gray-600">
+      {label}
+    </label>
+    <div className="px-4 py-2 min-w-[350px] bg-gray-300 border border-gray-300 rounded-md text-gray-700">
       {value || "Not available"}
     </div>
   </div>

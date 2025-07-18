@@ -28,15 +28,11 @@ const userSchema = new mongoose.Schema(
             enum: ["Admin", "Staff", "HOD", "Principal"],
             default: "Staff",
         },
-        // image: {
-        //     type: String,
-        //     required: true,
-        // },
-        hiringDate:{
+        hiringDate: {
             type: Date,
             default: Date.now,
         },
-        department:{
+        department: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Department",
         },
@@ -51,10 +47,12 @@ const userSchema = new mongoose.Schema(
         },
         employeeId: {
             type: String,
-            // required: true,
-            // unique: true,
+            default: null,  // Explicitly set default to null
+            // required: true,  // Commented out as per your original
+            // unique: true,     // Commented out as per your original
         },
     },
     { timestamps: true }
 );
+
 module.exports = mongoose.model("User", userSchema);
