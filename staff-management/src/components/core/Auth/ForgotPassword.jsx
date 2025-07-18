@@ -58,7 +58,7 @@ function ForgotPassword() {
       toast.success("OTP verified. You can now set your new password.");
       setStep(3); // Move to the new password step
     } catch (err) {
-      toast.error(err.message || "Invalid OTP");
+      toast.error(err.response?.data?.message || err.message );
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ function ForgotPassword() {
   const resetPassword = async () => {
     // Client-side validation: check if passwords match
     if (newPassword !== confirmNewPassword) {
-      toast.error("New password and confirm password do not match.");
+      toast.error("New password and confirm new password does not match.");
       return;
     }
     setLoading(true);
