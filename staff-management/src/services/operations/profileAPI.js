@@ -32,9 +32,9 @@ export const getProfileData = async (token) => {
 export const updateProfileData = async(token,editedData)=>{
     try{
         const response = await apiConnector(
-            "PUT",
+            "PATCH",
             updateEndpoints.UPDATE_PROFILE,
-            {token,editedData},
+            editedData,
             {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -47,13 +47,15 @@ export const updateProfileData = async(token,editedData)=>{
         toast.success("Update Successful");
         return {
             success: true,
-            profileData: response.data.profileData
+            updatedProfile: response.data.data
         };
+
+       
 
 
     }
     catch(e)
     {
-
+        console.log(e.message);
     }
-}
+} 
