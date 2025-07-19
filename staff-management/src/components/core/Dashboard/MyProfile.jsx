@@ -40,6 +40,46 @@ const MyProfile = () => {
       setLoading(false);
     }
   }, [token]);
+  // Handle changes in editable fields
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditableProfileData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Handle "Edit Profile" button click
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  // Handle "Cancel" button click
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditableProfileData(profile); // Revert changes to original profile data
+  };
+
+  // Handle "Save Changes" button click
+  /* const handleSaveProfile = async () => {
+    setLoading(true); // Set loading state for the save operation
+    try {
+      const response = await updateProfileData(token, editableProfileData);
+      if (response.success) {
+        setProfile(response.updatedProfile); // Update the main profile state with saved data
+        setEditableProfileData(response.updatedProfile); // Also update editable data
+        setIsEditing(false); // Exit edit mode
+        toast.success("Profile updated successfully!");
+      } else {
+        toast.error(response.message);
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to update profile.");
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  }; */
+
 
   if (loading) return <div className="p-4 text-center">Loading profile...</div>;
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>;

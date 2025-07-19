@@ -25,3 +25,8 @@ export const leaveEndpoints = {
 export const userEndpoints = {
     GET_ALL_USER: BASE_URL + "/getAllUser",
 }
+
+//UPDATE ENDPOINTS
+export const updateEndpoints={
+    UPDATE_PROFILE : BASE_URL+"/updateProfile"
+}

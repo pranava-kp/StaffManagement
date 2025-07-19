@@ -75,7 +75,7 @@ export function logout(navigate) {
         navigate("/login");
     };
 }
-
+/* 
 export const getProfileData = async (token) => {
     try {
         const response = await apiConnector(
@@ -93,4 +93,4 @@ export const getProfileData = async (token) => {
     } catch (error) {
         throw error;
     }
-};
+}; */
