@@ -18,9 +18,10 @@ curl -X POST http://localhost:2000/api/v1/login \
 
 # A cookies.txt file must be generated and should countain a Auth Bearer Token
 
-#GetAllUsers Call
-curl -X GET http://localhost:2000/api/v1/getAllUser \
-  -H "Authorization: Bearer TOKEN"
+# GetAllUsers Call
+# THe query string can be removed is necessary
+curl -X GET "http://localhost:2000/api/v1/getAllUser?accountTypes=Admin,HOD&departments=CSE,ECE" \
+  -H "Authorization: Bearer YOUR_TOKEN"
 
 # Logout test
 curl -X POST http://localhost:2000/api/v1/logout \
