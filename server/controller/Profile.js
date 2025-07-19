@@ -9,58 +9,176 @@ const { uploadFileToCloudinary } = require("../utils/fileUploader");
 const jwt = require("jsonwebtoken");
 exports.updateOwnProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
-
-    if (req.user.accountType !== "Staff") {
-      return res.status(403).json({ success: false, message: "Only staff can access this route." });
+    // Get user from authenticated cookie
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
     }
 
+    // Validate all required fields are present
     const { employeeId, phone, gender } = req.body;
+    if (employeeId === undefined || phone === undefined || gender === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields (employeeId, phone, gender) must be provided"
+      });
+    }
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    // Check if any fields already have values
+    const existingValues = [];
+    if (user.employeeId !== null && user.employeeId !== undefined) existingValues.push("employeeId");
+    if (user.phone !== null && user.phone !== undefined) existingValues.push("phone");
+    if (user.gender !== null && user.gender !== undefined) existingValues.push("gender");
 
-    if (employeeId) user.employeeId = employeeId;
-    if (phone) user.phone = phone;
-    if (gender) user.gender = gender;
+    if (existingValues.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot modify already set fields: ${existingValues.join(", ")}`,
+        fields: existingValues
+      });
+    }
+
+    // Update all fields
+    user.employeeId = employeeId;
+    user.phone = phone;
+    user.gender = gender;
 
     await user.save();
-    return res.status(200).json({ success: true, message: "Profile updated", data: user });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        email: user.email,
+        updatedFields: {
+          employeeId: user.employeeId,
+          phone: user.phone,
+          gender: user.gender
+        }
+      }
+    });
+
   } catch (err) {
-    console.error("Staff profile update failed:", err);
-    return res.status(500).json({ success: false, message: "Error updating profile", error: err.message });
+    console.error("Profile update failed:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error updating profile",
+      error: err.message
+    });
   }
 };
 
 exports.adminUpdateProfile = async (req, res) => {
   try {
     const requester = req.user;
+    const { id, ...updateData } = req.body;
 
-    if (requester.accountType !== "Principal") {
-      return res.status(403).json({ success: false, message: "Only principals can perform this operation." });
+    // Check if requester is authorized (Principal or Admin)
+    if (!["Principal", "Admin"].includes(requester.accountType)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Only principals or admins can perform this operation." 
+      });
     }
 
-    const { id, department, employeeId, phone, gender } = req.body;
+    // Validate required fields
     if (!id) {
-      return res.status(400).json({ success: false, message: "Target user ID required" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Target user ID required" 
+      });
     }
 
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ success: false, message: "Target user not found" });
+    // Check if trying to update password (not allowed)
+    if (updateData.password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Password cannot be updated through this endpoint" 
+      });
+    }
 
-    if (department) user.department = department;
-    if (employeeId) user.employeeId = employeeId;
-    if (phone) user.phone = phone;
-    if (gender) user.gender = gender;
+    // Get the list of valid fields from the user schema
+    const validFields = Object.keys(User.schema.paths);
+    const invalidFields = Object.keys(updateData).filter(
+      field => !validFields.includes(field) && field !== 'accountType'
+    );
+
+    // Reject if there are any invalid fields
+    if (invalidFields.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Invalid fields provided: ${invalidFields.join(', ')}` 
+      });
+    }
+
+    // Find the target user by ID
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Target user not found with the provided ID" 
+      });
+    }
+
+    // Handle account type changes with permission checks
+    if (updateData.accountType) {
+      if (requester.accountType === "Principal") {
+        // Principal can set any account type
+        user.accountType = updateData.accountType;
+      } else if (requester.accountType === "Admin") {
+        // Admin can only set to Admin or Staff
+        if (!["Admin", "Staff"].includes(updateData.accountType)) {
+          return res.status(403).json({ 
+            success: false, 
+            message: "Admins can only change account type to Admin or Staff" 
+          });
+        }
+        user.accountType = updateData.accountType;
+      }
+      delete updateData.accountType; // Remove from updateData to avoid duplicate update
+    }
+
+    // Check if email is being updated to an existing email
+    if (updateData.email) {
+      const emailExists = await User.findOne({ 
+        email: updateData.email,
+        _id: { $ne: user._id } // Exclude current user from check
+      });
+      
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use by another user"
+        });
+      }
+    }
+
+    // Update all allowed fields including email
+    for (const [key, value] of Object.entries(updateData)) {
+      if (validFields.includes(key)) {
+        user[key] = value;
+      }
+    }
 
     await user.save();
-    return res.status(200).json({ success: true, message: "User updated successfully", data: user });
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: "User updated successfully", 
+      data: user 
+    });
   } catch (err) {
     console.error("Admin update failed:", err);
-    return res.status(500).json({ success: false, message: "Failed to update user", error: err.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to update user", 
+      error: err.message 
+    });
   }
 };
-
 
 
 //Delete Account

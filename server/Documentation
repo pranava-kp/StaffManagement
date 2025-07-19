@@ -1,6 +1,6 @@
 Documentation
 
-# Create test user
+# Create user
 curl -X POST http://localhost:2000/api/v1/signup \
   -H "Content-Type: application/json" \
   -d '{
@@ -8,8 +8,7 @@ curl -X POST http://localhost:2000/api/v1/signup \
     "lastName": "Doe",
     "email": "john.doe@example.com",
     "password": "securePassword123"
-}' \
-  -c cookies.txt
+}'
 
 # Login test
 curl -X POST http://localhost:2000/api/v1/login \
@@ -63,3 +62,31 @@ curl -X GET http://localhost:2000/api/v1/profile \
 curl -X GET http://localhost:2000/api/v1/profile \
   -b cookies.txt \
   -H "Content-Type: application/json"
+
+
+# Udating Profiles
+# 1. Update by Staff
+# This api can only be called once iff there are null or undefined fields in the DB entry. Those fields can be updated
+curl -X PATCH http://localhost:2000/api/v1/update-own-profile   -H "Content-Type: application/json"   -H "Authorization: Bearer TOKEN"   -d '{
+    "employeeId": "96",
+    "phone": "7019367895",
+    "gender": "Female"
+  }'
+# 2. Update by admin
+# This call can be made only by admin or Principal, allows changes to all fields
+# Target is identified using the id field
+curl -X PATCH http://localhost:2000/api/v1/admin-update-profile \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "687b3ad366c8e63a8d6fe0cb",
+    "email": "1rn22cs118.pranavakp@rnsit.ac.in",
+    "firstName": "Pranava",
+    "lastName": "K P",
+    "accountType": "Staff",
+    "department": "ME",
+    "employeeId": "96",
+    "gender": "Female",
+    "phone": "7019367895"
+  }'
+
