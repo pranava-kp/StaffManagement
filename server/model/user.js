@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
         accountType: {
             type: String,
             enum: ["Admin", "Staff", "HOD", "Principal"],
-            default: "Staff",
+            default: "Admin",
         },
         hiringDate: {
             type: Date,
@@ -39,16 +39,25 @@ const userSchema = new mongoose.Schema(
         },
         token: {
             type: String,
+            default: null
         },
         expiryTime: {
             type: Date,
+            default: null
         },
-        phone: String,
+        phone: {
+            type: String,
+            default: null
+        },
         gender: {
             type: String,
             enum: ["Male", "Female", "Other"],
+            default: null
         },
-        employeeId: String
+        employeeId: {
+            type: String,
+            default: null
+        }
     },
     { timestamps: true }
 );

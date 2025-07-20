@@ -1,6 +1,7 @@
 const User = require('../model/user');
 const OTP = require('../model/otpModel');
-const mailSender = require('../utils/mailSender');
+const mailSender = require('../mail/sender');
+const { sendPasswordResetOTP } = require('../mail/templates/credentials'); 
 const bcrypt = require('bcrypt');
 const BlacklistedToken = require('../model/BlacklistedToken');
 
@@ -42,7 +43,7 @@ exports.logout = async (req, res) => {
 
 exports.generateOTP = async (req, res) => {
     try {
-        console.log('Generate OTP request received:', req.body); // Log incoming request
+        console.log('Generate OTP request received:', req.body);
         
         const { email } = req.body;
         if (!email) {
@@ -53,39 +54,43 @@ exports.generateOTP = async (req, res) => {
             });
         }
 
-        console.log('Searching for user:', email);
+        // 1. Find user
         const user = await User.findOne({ email });
         if (!user) {
             console.log('User not found for email:', email);
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'If this email exists, an OTP will be sent'
             });
         }
 
+        // 2. Generate and save OTP (10 minute expiry)
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('Generated OTP:', otp);
+        const expiresAt = new Date(Date.now() + 10*60*1000); // 10 minutes
+        
+        await OTP.findOneAndUpdate(
+            { email },
+            { otp, expiresAt, createdAt: new Date() },
+            { upsert: true, new: true }
+        );
 
-        const otpRecord = new OTP({ email, otp });
-        await otpRecord.save();
-        console.log('OTP saved to database');
-
-        const emailSubject = 'Password Reset OTP';
-        const emailBody = `Your OTP is: ${otp}`;
-
-        console.log('Attempting to send email to:', email);
-        await mailSender(email, emailSubject, emailBody);
-        console.log('Email sent successfully');
-
+        console.log('OTP generated for:', email);
+        
+        // 3. Send email using the imported function (remove the redundant require)
+        await sendPasswordResetOTP(email, otp);
+        
         return res.status(200).json({
             success: true,
-            message: 'OTP sent successfully'
+            message: 'OTP sent successfully',
+            // For development/testing only:
+            ...(process.env.NODE_ENV === 'development' && { debugOtp: otp })
         });
+
     } catch (error) {
         console.error('Generate OTP error:', error);
         return res.status(500).json({
             success: false,
-            message: error.message // Return actual error message
+            message: 'Failed to process OTP request'
         });
     }
 };

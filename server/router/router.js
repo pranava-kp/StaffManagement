@@ -17,6 +17,8 @@ const { createLeave, getAllUserLeaves } = require("../controller/Leave");
 const { getAllUsers } = require("../controller/User");
 const { getMyProfile } = require("../controller/Profile");
 const { updateOwnProfile, adminUpdateProfile } = require("../controller/Profile");
+const { addStaff } = require("../controller/addStaff");
+
 
 // AUTH ROUTES
 router.post("/signup", signup);
@@ -42,6 +44,8 @@ router.get("/profile", auth, getMyProfile);
 router.get("/getAllUser", auth, allowRoles(["HOD", "Admin", "Principal"]), getAllUsers);
 router.patch("/update-own-profile", auth, isStaff, updateOwnProfile);          // For staff
 router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);
+router.post("/add-user", auth, allowRoles(["Admin", "Principal", "HOD"]), addStaff);
+
     // For Principal
 
 module.exports = router;

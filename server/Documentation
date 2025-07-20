@@ -91,3 +91,15 @@ curl -X PATCH http://localhost:2000/api/v1/admin-update-profile \
     "phone": "7019367895"
   }'
 
+# Call to create new user
+# Works only using Principal, Admin, HoD type bearer tokens
+curl -X POST http://localhost:2000/api/v1/add-user \
+-H "Authorization: Bearer TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+    "firstName": "X",
+    "lastName": "Y",
+    "email": "pranavakp2004+csehod@gmail.com",
+    "department": "CSE",
+    "accountType": "HOD"
+}'
