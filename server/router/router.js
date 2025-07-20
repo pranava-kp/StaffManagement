@@ -34,13 +34,14 @@ router.post("/imageUpload", imageUpload);
 router.get("/getAllimage", getAllFiles);
 
 // LEAVE ROUTES
-router.post("/createLeave", auth, isStaff, createLeave);
+router.post("/createLeave", auth, allowRoles(["Staff", "HOD"]), createLeave);
 router.get("/getAllUserLeaves", auth, isStaff, getAllUserLeaves);
 
 // USER ROUTES
 router.get("/profile", auth, getMyProfile);
-router.get("/getAllUser", auth, getAllUsers);
+router.get("/getAllUser", auth, allowRoles(["HOD", "Admin", "Principal"]), getAllUsers);
 router.patch("/update-own-profile", auth, isStaff, updateOwnProfile);          // For staff
-router.patch("/admin-update-profile", auth, adminUpdateProfile);    // For Principal
+router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);
+    // For Principal
 
 module.exports = router;

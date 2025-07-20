@@ -96,7 +96,7 @@ exports.logout = async (req, res) => {
   }
 };
 
-// Role-based middlewares remain unchanged
+
 const checkRole = (role) => async (req, res, next) => {
   try {
     if (req.user?.accountType !== role) {
@@ -116,5 +116,16 @@ const checkRole = (role) => async (req, res, next) => {
 };
 
 exports.isStaff = checkRole("Staff");
-exports.isHead = checkRole("Head");
 exports.isAdmin = checkRole("Admin");
+exports.isPrincipal = checkRole("Principal");
+
+// For routes that allow multiple roles
+exports.allowRoles = (roles) => (req, res, next) => {
+  if (!roles.includes(req.user.accountType)) {
+    return res.status(403).json({
+      success: false,
+      message: `Access restricted to: ${roles.join(", ")}`
+    });
+  }
+  next();
+};
