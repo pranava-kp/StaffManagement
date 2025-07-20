@@ -11,7 +11,7 @@ const {
     resetPasswordWithOTP,
     changePassword
 } = require("../controller/auth");
-const { auth, isStaff } = require("../middleware/auth");
+const { auth, isStaff, allowRoles } = require("../middleware/auth");
 const { imageUpload, getAllFiles } = require("../controller/File");
 const { createLeave, getAllUserLeaves } = require("../controller/Leave");
 const { getAllUsers } = require("../controller/User");
