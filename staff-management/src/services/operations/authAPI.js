@@ -94,3 +94,29 @@ export const getProfileData = async (token) => {
         throw error;
     }
 }; */
+export function addUser(formData, token, navigate) {
+    return async (dispatch) => {
+        const toastId = toast.loading("Creating user...");
+        try {
+            const response = await apiConnector(
+                "POST",
+                `${process.env.REACT_APP_BASE_URL}/add-user`,
+                formData,
+                {
+                    Authorization: `Bearer ${token}`,
+                }
+            );
+
+            if (!response.data.success) {
+                throw new Error(response.data.message);
+            }
+
+            toast.success(response.data.message || "User created successfully");
+            navigate("/dashboard/all-staffs");
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response?.data?.message || "Failed to create user");
+        }
+        toast.dismiss(toastId);
+    };
+}
