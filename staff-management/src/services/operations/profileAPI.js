@@ -2,6 +2,7 @@ import { apiConnector } from "../apiConnector";
 import { endpoints } from "../apis";
 import { updateEndpoints } from "../apis";
 import { toast } from "react-hot-toast";
+import { userEndpoints } from "../apis";
 
 export const getProfileData = async (token) => {
   try {
@@ -79,31 +80,33 @@ export const updateProfileData = async(token, editedData) => {
 
 export const getAllProfiles = async (token, filters) => {
   try {
-    // Construct query parameters
     const params = {};
     if (filters.departments && filters.departments.length > 0) {
-      params.departments = filters.departments.join(','); // Send as comma-separated string
+      params.departments = filters.departments.join(',');
     }
     if (filters.userTypes && filters.userTypes.length > 0) {
-      params.userTypes = filters.userTypes.join(','); // Send as comma-separated string
+      params.accountTypes = filters.userTypes.join(','); 
     }
 
-    console.log("Fetching profiles with params:", params); // For debugging
+    console.log("getAllProfiles (Frontend): Parameters being sent to backend:", params); 
 
     const response = await apiConnector(
       "GET",
-      endpoints.GET_ALL_USER, 
+      userEndpoints.GET_ALL_USER, 
       null, 
       { Authorization: `Bearer ${token}` },
       params 
     );
 
+    console.log("getAllProfiles (Frontend): Full API response:", response);
+    
     if (!response.data.success) {
       throw new Error(response.data.message);
     }
-    return { success: true, profiles: response.data.userDetails }; 
+    console.log("getAllProfiles (Frontend): Profiles received from backend:", response.data.data.users); 
+    return { success: true, profiles: response.data.data.users }; 
   } catch (error) {
-    console.error("GET_ALL_PROFILES_API ERROR:", error);
+    console.error("GET_ALL_PROFILES_API ERROR (Frontend):", error);
     toast.error(error.response?.data?.message || "Failed to fetch profiles.");
     return { success: false, message: error.response?.data?.message || "Failed to fetch profiles" };
   }
