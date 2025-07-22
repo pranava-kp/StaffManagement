@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import { getProfileData, updateProfileData } from '../../../services/operations/profileAPI';
-import ConfirmationModal from '../../common/ConfirmationModal'; // Path to your modal
+import ConfirmationModal from '../../common/ConfirmationModal'; 
 
 const MyProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -69,14 +69,31 @@ const MyProfile = () => {
     setIsEditing(true);
   };
 
+  
   const handleSaveProfile = async () => {
+    setShowConfirmation(true);
+  };
+
+ 
+  const handleConfirmSave = async () => {
+  
+    if (
+      !editableProfileData.employeeId ||
+      !editableProfileData.gender ||
+      !editableProfileData.phoneNumber
+    ) {
+      toast.error("Please fill all mandatory fields: Employee ID, Gender, and Phone.");
+      setShowConfirmation(false); 
+      return; 
+    }
+
     setShowConfirmation(false);
     setLoading(true);
     try {
       const dataToUpdate = {
         employeeId: editableProfileData.employeeId,
         gender: editableProfileData.gender,
-        phoneNumber: editableProfileData.phoneNumber,
+        phone: editableProfileData.phoneNumber, 
       };
 
       const response = await updateProfileData(token, dataToUpdate);
@@ -85,14 +102,15 @@ const MyProfile = () => {
         const updatedProfile = {
           ...profile,
           ...response.updatedProfile,
-          phoneNumber: response.updatedProfile.phoneNumber
+          
+          phoneNumber: response.updatedProfile.phone || response.updatedProfile.phoneNumber 
         };
 
         setProfile(updatedProfile);
         setEditableProfileData(updatedProfile);
         setIsEditing(false);
-        setHasNullValues(false);
-        // toast.success("Profile updated successfully!");
+        setHasNullValues(false); 
+        toast.success("Profile updated successfully!"); 
       }
     } catch (err) {
       toast.error(err.message || "Failed to update profile.");
@@ -100,6 +118,7 @@ const MyProfile = () => {
       setLoading(false);
     }
   };
+
 
   if (loading) return <div className="p-4 text-center">Loading profile...</div>;
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
@@ -119,13 +138,16 @@ const MyProfile = () => {
           </button>
         )}
         {isEditing && (
-          <button
-            onClick={() => setShowConfirmation(true)}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-200"
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
+          <>
+            <button
+              onClick={handleSaveProfile}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-200"
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+           
+          </>
         )}
       </div>
 
@@ -216,13 +238,13 @@ const MyProfile = () => {
         btn1Text="Cancel"
         btn2Text="Confirm"
         btn1Handler={() => setShowConfirmation(false)}
-        btn2Handler={handleSaveProfile}
+        btn2Handler={handleConfirmSave}
       />
     </div>
   );
 };
 
-// Original ProfileField component format
+
 const ProfileField = ({ label, name, value, isEditing, onChange, type = "text", readOnly = false, options = [] }) => (
   <div className="flex flex-col gap-1">
     <label htmlFor={name} className="text-sm font-medium uppercase text-gray-600">
@@ -236,6 +258,7 @@ const ProfileField = ({ label, name, value, isEditing, onChange, type = "text", 
           value={value}
           onChange={onChange}
           className="px-4 py-2 w-full bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required={!readOnly} 
         >
           <option value="" disabled>Select {label}</option>
           {options.map(option => (
@@ -250,6 +273,7 @@ const ProfileField = ({ label, name, value, isEditing, onChange, type = "text", 
           value={value}
           onChange={onChange}
           className="px-4 py-2 w-full bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required={!readOnly}
         />
       )
     ) : (
@@ -260,4 +284,4 @@ const ProfileField = ({ label, name, value, isEditing, onChange, type = "text", 
   </div>
 );
 
-export default MyProfile;
+export default MyProfile

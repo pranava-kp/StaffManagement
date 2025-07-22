@@ -8,7 +8,7 @@ const AddStaff = () => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   
-  // Form state
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -47,7 +47,12 @@ const AddStaff = () => {
         setAvailableRoles(["Admin", "Staff"]);
         break;
       default:
-        return;
+
+        setIsDeptDisabled(true);
+        setAvailableRoles([]);
+   
+        toast.error("You are not authorized to add staff.");
+        break;
     }
   }, []);
 
@@ -61,7 +66,7 @@ const AddStaff = () => {
       firstName: "",
       lastName: "",
       email: "",
-      department: isDeptDisabled ? formData.department : "",
+      department: isDeptDisabled ? formData.department : "", 
       accountType: ""
     });
   };
@@ -82,29 +87,32 @@ const AddStaff = () => {
 
     setIsLoading(true);
     try {
+     
       await dispatch(addUser(formData, token, resetForm));
-      // toast.success("User created successfully", { duration: 3000 });
+      toast.success("User created successfully"); 
     } catch (error) {
-      toast.error(error.message || "Failed to create user", { duration: 3000 });
+      toast.error(error.message || "Failed to create user");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">New User</h2>
+    <div className="flex flex-col border bg-gray-100 gap-8 w-full rounded-md p-6"> 
+      <p className="border-b-2 w-full p-3 border-gray-300 text-xl font-semibold">Add New User</p> 
 
-        <form onSubmit={handleSubmit} className="space-y-4 bg-gray-100 p-6 rounded-md shadow-md border">
-          <div className="grid grid-cols-2 gap-4">
+      <div className="p-4 bg-white rounded-md shadow-sm"> 
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">New User Details</h2> 
+
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto"> 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
             <input
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
               placeholder="First Name"
-              className="border p-2 rounded w-full text-gray-800 bg-white"
+              className="border p-2 rounded w-full text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500"
               required
             />
             <input
@@ -113,7 +121,7 @@ const AddStaff = () => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Last Name"
-              className="border p-2 rounded w-full text-gray-800 bg-white"
+              className="border p-2 rounded w-full text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
@@ -124,17 +132,17 @@ const AddStaff = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder="Email"
-            className="border p-2 rounded w-full text-gray-800 bg-white"
+            className="border p-2 rounded w-full text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500"
             required
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
             <select
               name="department"
               value={formData.department}
               disabled={isDeptDisabled}
               onChange={handleChange}
-              className={`border p-2 rounded w-full text-gray-800 ${isDeptDisabled ? "bg-gray-200 text-gray-600" : "bg-white"}`}
+              className={`border p-2 rounded w-full text-gray-800 focus:ring-blue-500 focus:border-blue-500 ${isDeptDisabled ? "bg-gray-200 text-gray-600 cursor-not-allowed" : "bg-white"}`}
               required
             >
               <option value="" hidden>Select Department</option>
@@ -147,7 +155,7 @@ const AddStaff = () => {
               name="accountType"
               value={formData.accountType}
               onChange={handleChange}
-              className="border p-2 rounded w-full text-gray-800 bg-white"
+              className="border p-2 rounded w-full text-gray-800 bg-white focus:ring-blue-500 focus:border-blue-500"
               required
             >
               <option value="" hidden>Select Role</option>
@@ -159,7 +167,7 @@ const AddStaff = () => {
 
           <button
             type="submit"
-            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors ${
+            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full ${ // Full width button
               isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={isLoading}
