@@ -28,5 +28,6 @@ export const userEndpoints = {
 
 //UPDATE ENDPOINTS
 export const updateEndpoints={
-    UPDATE_PROFILE : BASE_URL+"/update-own-profile"
+    UPDATE_PROFILE : BASE_URL+"/update-own-profile",
+   
 }

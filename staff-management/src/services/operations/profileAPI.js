@@ -77,7 +77,6 @@ export const updateProfileData = async(token, editedData) => {
     throw e; // Make sure to re-throw the error
   }
 }
-
 export const getAllProfiles = async (token, filters) => {
   try {
     const params = {};
