@@ -47,10 +47,10 @@ const AddStaff = () => {
         setAvailableRoles(["Admin", "Staff"]);
         break;
       default:
-
+     
         setIsDeptDisabled(true);
         setAvailableRoles([]);
-   
+    
         toast.error("You are not authorized to add staff.");
         break;
     }
@@ -87,9 +87,9 @@ const AddStaff = () => {
 
     setIsLoading(true);
     try {
-     
+      
       await dispatch(addUser(formData, token, resetForm));
-      toast.success("User created successfully"); 
+      toast.success("User created successfully");
     } catch (error) {
       toast.error(error.message || "Failed to create user");
     } finally {
@@ -102,10 +102,10 @@ const AddStaff = () => {
       <p className="border-b-2 w-full p-3 border-gray-300 text-xl font-semibold">Add New User</p> 
 
       <div className="p-4 bg-white rounded-md shadow-sm"> 
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">New User Details</h2> 
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">New User Details</h2> 
 
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto"> 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-xl"> 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               name="firstName"
