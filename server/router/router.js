@@ -15,9 +15,15 @@ const { auth, isStaff, allowRoles } = require("../middleware/auth");
 const { imageUpload, getAllFiles } = require("../controller/File");
 const { createLeave, getAllUserLeaves } = require("../controller/Leave");
 const { getAllUsers } = require("../controller/User");
-const { getMyProfile } = require("../controller/Profile");
-const { updateOwnProfile, adminUpdateProfile } = require("../controller/Profile");
+// const { getMyProfile } = require("../controller/Profile");
+// const { updateOwnProfile, adminUpdateProfile } = require("../controller/Profile");
 const { addStaff } = require("../controller/addStaff");
+const { 
+    getMyProfile, 
+    updateOwnProfile, 
+    adminUpdateProfile,
+    deleteProfile  // Add this line
+} = require("../controller/Profile");
 
 
 // AUTH ROUTES
@@ -45,6 +51,7 @@ router.get("/getAllUser", auth, allowRoles(["HOD", "Admin", "Principal"]), getAl
 router.patch("/update-own-profile", auth, updateOwnProfile);
 router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);
 router.post("/add-user", auth, allowRoles(["Admin", "Principal", "HOD"]), addStaff);
+router.delete("/delete-user", auth, allowRoles(["Admin", "Principal", "HOD"]), deleteProfile);
 
     // For Principal
 

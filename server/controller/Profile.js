@@ -1,4 +1,4 @@
-const Department = require("../model/department");
+// const Department = require("../model/department");
 const Leave = require("../model/leave");
 const Profile = require("../model/profile");
 const User = require("../model/user");
@@ -180,64 +180,73 @@ exports.adminUpdateProfile = async (req, res) => {
   }
 };
 
-
-//Delete Account
 exports.deleteProfile = async (req, res) => {
     try {
-        //Fetch data
-        const id = req.user.id;
-        //Validate Id
-        const userDetails = await User.findById(id);
-        if (!userDetails) {
+        const { email } = req.body; // Get email from request body
+        const requester = req.user; // The user making the request
+
+        // Validate email
+        if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid User Id",
+                message: "Email is required",
             });
         }
 
-        //DELETE USER PROFILE
+        // Find the user by email
+        const userToDelete = await User.findOne({ email });
+        if (!userToDelete) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
 
-        //Removing profile image from cloudinary and delete that file schema from database
-        let imageId = null;
-        let imagePublicId = null;
-        File.findOne({ user: id }, (error, file) => {
-            if (error) {
-                console.error(error);
-            } else if (file) {
-                imageId = file._id;
-                imagePublicId = file.publicId;
-                console.log("ImageId:", imageId);
-                console.log("ImagePublicId", imagePublicId);
-            } else {
-                console.log("Object not found");
+        // Authorization check
+        if (requester.accountType === "Principal") {
+            // Principal can delete anyone - no additional checks needed
+        } 
+        else if (requester.accountType === "Admin" || requester.accountType === "HOD") {
+            // For Admin/HOD, department must match
+            if (requester.department !== userToDelete.department) {
+                return res.status(403).json({
+                    success: false,
+                    message: "You can only delete users from your own department",
+                });
             }
-        });
-        cloudinary.uploader.destroy(imageId, (error, result) => {
-            if (error) {
-                console.error("Error in delete profile pic: ", error);
-            } else {
-                console.log("Result after deleting file: ", result);
-                console.log("File deleted successfully");
+        }
+
+        // Delete profile image from Cloudinary if exists
+        const file = await File.findOne({ user: userToDelete._id });
+        if (file) {
+            try {
+                await cloudinary.uploader.destroy(file.publicId);
+                await File.findByIdAndDelete(file._id);
+            } catch (error) {
+                console.error("Error deleting profile image:", error);
             }
-        });
-        await File.findByIdAndDelete(imageId); //Deleting file schema
+        }
 
-        //First we're deleting User's profile additional Details
-        await Profile.findByIdAndDelete(userDetails.additionalDetails);
+        // Delete profile (additionalDetails)
+        if (userToDelete.additionalDetails) {
+            await Profile.findByIdAndDelete(userToDelete.additionalDetails);
+        }
 
-        //Removing all leaves of the user
-        await Leave.deleteMany({ user: id });
+        // Delete all leaves of the user
+        await Leave.deleteMany({ user: userToDelete._id });
 
-        //Now we're deleting all details of the User
-        await User.findByIdAndDelete(id);
+        // Finally delete the user
+        await User.findByIdAndDelete(userToDelete._id);
+
         return res.status(200).json({
             success: true,
-            message: "User deleted successfully",
+            message: "User and associated data deleted successfully",
         });
     } catch (err) {
+        console.error("Error in deleteProfile:", err);
         return res.status(500).json({
             success: false,
-            message: "Unable to delete User profile, Internal error",
+            message: "Failed to delete user profile",
             error: err.message,
         });
     }
