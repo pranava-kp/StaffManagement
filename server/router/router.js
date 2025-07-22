@@ -42,7 +42,7 @@ router.get("/getAllUserLeaves", auth, isStaff, getAllUserLeaves);
 // USER ROUTES
 router.get("/profile", auth, getMyProfile);
 router.get("/getAllUser", auth, allowRoles(["HOD", "Admin", "Principal"]), getAllUsers);
-router.patch("/update-own-profile", auth, isStaff, updateOwnProfile);          // For staff
+router.patch("/update-own-profile", auth, updateOwnProfile);
 router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);
 router.post("/add-user", auth, allowRoles(["Admin", "Principal", "HOD"]), addStaff);
 
