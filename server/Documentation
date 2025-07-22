@@ -10,6 +10,13 @@ curl -X POST http://localhost:2000/api/v1/signup \
     "password": "securePassword123"
 }'
 
+# Deleteing a user
+# This action can be performed only by Admin, Staff or HOD
+
+curl -X DELETE http://localhost:2000/api/v1/delete-user \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "TARGET_MAIL_ID"}'
 # Login test
 curl -X POST http://localhost:2000/api/v1/login \
   -H "Content-Type: application/json" \
