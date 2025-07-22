@@ -215,17 +215,15 @@ exports.updateLeaveStatus = async (req, res) => {
 };
 
 // # Approve a leave
-// curl -X POST "http://localhost:3000/api/v1/update-leave-status" \
-// -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2Y1N2FiMWQwZTU4MDVlMzFhYjUwYiIsImVtYWlsIjoicHJhbmF2YWtwMjAwNCtDU0VIT0RAZ21haWwuY29tIiwiYWNjb3VudFR5cGUiOiJIT0QiLCJkZXBhcnRtZW50IjoiQ1NFIiwiaWF0IjoxNzUzMjExNzk3LCJleHAiOjE3NTM4MTY1OTd9.pinymC-LR7WQP3jGq7PznTvpAtpwgT137-nDFtD21ro" \
+// curl -X POST "http://localhost:2000/api/v1/update-leave-status" \
+// -H "Authorization: Bearer PRINCIPAL_OR_HOD_TOKEN" \
 // -H "Content-Type: application/json" \
 // -d '{
-//   "leaveId": "687fc9d00c8a047006004f23",
+//   "leaveId": "687fe5541b24be76ddbf3061",
 //   "status": "Approved"
 // }'
 
 
+
 // # Reject a leave with reason
-// curl -X POST "http://localhost:5000/api/v1/update-leave-status" \
-// -H "Authorization: Bearer YOUR_TOKEN" \
-// -H "Content-Type: application/json" \
-// -d '{"leaveId": "65a1b2c3d4e5f6a7b8c9d0e1", "status": "Rejected", "rejectionReason": "Insufficient substitute coverage"}'
+// curl -X POST "http://localhost:2000/api/v1/update-leave-status" -H "Authorization: Bearer PRINCIPAL_OR_HOD_TOKEN" -H "Content-Type: application/json" -d '{"leaveId": "687fe5541b24be76ddbf3061", "status": "Rejected", "rejectionReason": "Insufficient substitute coverage"}'
