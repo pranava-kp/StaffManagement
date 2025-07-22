@@ -32,10 +32,6 @@ const leaveSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    substituteTeachers: {
-        type: Object,
-        required: true,
-    },
     createdAt: {
         type: Date,
         default: Date.now,
