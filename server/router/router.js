@@ -11,20 +11,17 @@ const {
     resetPasswordWithOTP,
     changePassword
 } = require("../controller/auth");
-const { auth, isStaff, allowRoles } = require("../middleware/auth");
+const { auth, isStaff, isHOD, isPrincipal, allowRoles } = require("../middleware/auth");
 const { imageUpload, getAllFiles } = require("../controller/File");
-const { createLeave, getAllUserLeaves } = require("../controller/Leave");
+const { createLeave, getAllUserLeaves, updateLeaveStatus } = require("../controller/Leave");
 const { getAllUsers } = require("../controller/User");
-// const { getMyProfile } = require("../controller/Profile");
-// const { updateOwnProfile, adminUpdateProfile } = require("../controller/Profile");
-const { addStaff } = require("../controller/addStaff");
 const { 
     getMyProfile, 
     updateOwnProfile, 
     adminUpdateProfile,
-    deleteProfile  // Add this line
+    deleteProfile
 } = require("../controller/Profile");
-
+const { addStaff } = require("../controller/addStaff");
 
 // AUTH ROUTES
 router.post("/signup", signup);
@@ -44,6 +41,12 @@ router.get("/getAllimage", getAllFiles);
 // LEAVE ROUTES
 router.post("/createLeave", auth, allowRoles(["Staff", "HOD"]), createLeave);
 router.get("/getAllUserLeaves", auth, isStaff, getAllUserLeaves);
+// Change the route to a simple POST endpoint
+router.post("/update-leave-status", 
+    auth, 
+    allowRoles(["HOD", "Principal"]), 
+    updateLeaveStatus
+);
 
 // USER ROUTES
 router.get("/profile", auth, getMyProfile);
@@ -52,7 +55,5 @@ router.patch("/update-own-profile", auth, updateOwnProfile);
 router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);
 router.post("/add-user", auth, allowRoles(["Admin", "Principal", "HOD"]), addStaff);
 router.delete("/delete-user", auth, allowRoles(["Admin", "Principal", "HOD"]), deleteProfile);
-
-    // For Principal
 
 module.exports = router;

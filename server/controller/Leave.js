@@ -123,3 +123,109 @@ exports.getAllUserLeaves = async (req, res) => {
         });
     }
 };
+
+exports.updateLeaveStatus = async (req, res) => {
+    try {
+        const { leaveId, status, rejectionReason } = req.body;
+        const user = req.user;
+
+        // Validate input
+        if (!leaveId || !status || !['Approved', 'Rejected'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Valid leaveId and status (Approved/Rejected) are required",
+            });
+        }
+
+        // Check if user is authorized (HOD or Principal)
+        if (user.accountType !== 'HOD' && user.accountType !== 'Principal') {
+            return res.status(403).json({
+                success: false,
+                message: "Only HOD or Principal can update leave status",
+            });
+        }
+
+        // Find the leave
+        const leave = await Leave.findById(leaveId).populate('user');
+        if (!leave) {
+            return res.status(404).json({
+                success: false,
+                message: "Leave not found",
+            });
+        }
+
+        // Additional check for HOD - can only approve leaves from their department
+        if (user.accountType === 'HOD') {
+            const leaveUser = await User.findById(leave.user);
+            if (user.department !== leaveUser.department) {
+                return res.status(403).json({
+                    success: false,
+                    message: "HOD can only approve leaves from their own department",
+                });
+            }
+        }
+
+        // Check if leave is already processed
+        if (leave.status !== 'Pending') {
+            return res.status(400).json({
+                success: false,
+                message: `Leave has already been ${leave.status.toLowerCase()}`,
+            });
+        }
+
+        // Update leave status
+        leave.status = status;
+        leave.updatedAt = new Date();
+        
+        // Append status update information to the body
+        const processedBy = `${user.accountType} (${user.firstName} ${user.lastName})`;
+        const statusUpdate = `\n\n[Status Update: ${status} by ${processedBy} on ${new Date().toLocaleString()}]`;
+        
+        if (status === 'Rejected' && rejectionReason) {
+            leave.body += `${statusUpdate}\nReason: ${rejectionReason}`;
+        } else {
+            leave.body += statusUpdate;
+        }
+
+        await leave.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Leave ${status.toLowerCase()} successfully`,
+            data: {
+                _id: leave._id,
+                status: leave.status,
+                updatedAt: leave.updatedAt,
+                subject: leave.subject,
+                user: {
+                    _id: leave.user._id,
+                    name: `${leave.user.firstName} ${leave.user.lastName}`
+                }
+            },
+        });
+
+    } catch (err) {
+        console.error("Leave status update error:", err);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: process.env.NODE_ENV === "development" ? err.message : undefined,
+            success: false,
+        });
+    }
+};
+
+// # Approve a leave
+// curl -X POST "http://localhost:3000/api/v1/update-leave-status" \
+// -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2Y1N2FiMWQwZTU4MDVlMzFhYjUwYiIsImVtYWlsIjoicHJhbmF2YWtwMjAwNCtDU0VIT0RAZ21haWwuY29tIiwiYWNjb3VudFR5cGUiOiJIT0QiLCJkZXBhcnRtZW50IjoiQ1NFIiwiaWF0IjoxNzUzMjExNzk3LCJleHAiOjE3NTM4MTY1OTd9.pinymC-LR7WQP3jGq7PznTvpAtpwgT137-nDFtD21ro" \
+// -H "Content-Type: application/json" \
+// -d '{
+//   "leaveId": "687fc9d00c8a047006004f23",
+//   "status": "Approved"
+// }'
+
+
+// # Reject a leave with reason
+// curl -X POST "http://localhost:5000/api/v1/update-leave-status" \
+// -H "Authorization: Bearer YOUR_TOKEN" \
+// -H "Content-Type: application/json" \
+// -d '{"leaveId": "65a1b2c3d4e5f6a7b8c9d0e1", "status": "Rejected", "rejectionReason": "Insufficient substitute coverage"}'
