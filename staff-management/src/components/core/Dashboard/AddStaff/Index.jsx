@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { getTokenPayload } from "../../../../utils/jwtUtils";
 import { addUser } from "../../../../services/operations/authAPI";
+import toast from "react-hot-toast";
 
 const AddStaff = () => {
-  const [selectedDept, setSelectedDept] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    department: "",
+    accountType: ""
+  });
+
   const [isDeptDisabled, setIsDeptDisabled] = useState(false);
   const [availableRoles, setAvailableRoles] = useState([]);
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-
   const DEPARTMENTS = ["CSE", "ISE", "ECE", "ME"];
 
   useEffect(() => {
@@ -31,12 +38,12 @@ const AddStaff = () => {
         break;
       case "Admin":
         setIsDeptDisabled(true);
-        setSelectedDept(deptFromUser);
+        setFormData(prev => ({...prev, department: deptFromUser}));
         setAvailableRoles(["Staff"]);
         break;
       case "HOD":
         setIsDeptDisabled(true);
-        setSelectedDept(deptFromUser);
+        setFormData(prev => ({...prev, department: deptFromUser}));
         setAvailableRoles(["Admin", "Staff"]);
         break;
       default:
@@ -44,16 +51,44 @@ const AddStaff = () => {
     }
   }, []);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({...prev, [name]: value}));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      department: isDeptDisabled ? formData.department : "",
+      accountType: ""
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      firstName,
-      lastName,
-      email,
-      department: selectedDept,
-      accountType: selectedRole,
-    };
-    await addUser(payload);
+    
+    if (!formData.department || !formData.accountType) {
+      toast.error("Please select department and role");
+      return;
+    }
+
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+    if (!token) {
+      toast.error("Authentication token missing");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await dispatch(addUser(formData, token, resetForm));
+      // toast.success("User created successfully", { duration: 3000 });
+    } catch (error) {
+      toast.error(error.message || "Failed to create user", { duration: 3000 });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,23 +96,22 @@ const AddStaff = () => {
       <div className="max-w-2xl mx-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">New User</h2>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 bg-gray-100 p-6 rounded-md shadow-md border"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4 bg-gray-100 p-6 rounded-md shadow-md border">
           <div className="grid grid-cols-2 gap-4">
             <input
               type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
               placeholder="First Name"
               className="border p-2 rounded w-full text-gray-800 bg-white"
               required
             />
             <input
               type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
               placeholder="Last Name"
               className="border p-2 rounded w-full text-gray-800 bg-white"
               required
@@ -86,8 +120,9 @@ const AddStaff = () => {
 
           <input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             placeholder="Email"
             className="border p-2 rounded w-full text-gray-800 bg-white"
             required
@@ -95,47 +130,41 @@ const AddStaff = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <select
-              value={selectedDept}
+              name="department"
+              value={formData.department}
               disabled={isDeptDisabled}
-              onChange={(e) => setSelectedDept(e.target.value)}
+              onChange={handleChange}
               className={`border p-2 rounded w-full text-gray-800 ${isDeptDisabled ? "bg-gray-200 text-gray-600" : "bg-white"}`}
+              required
             >
-              {selectedDept === "" && (
-                <option value="" hidden>
-                  Select an option
-                </option>
-              )}
+              <option value="" hidden>Select Department</option>
               {DEPARTMENTS.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
+                <option key={dept} value={dept}>{dept}</option>
               ))}
             </select>
 
             <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
+              name="accountType"
+              value={formData.accountType}
+              onChange={handleChange}
               className="border p-2 rounded w-full text-gray-800 bg-white"
               required
             >
-              {selectedRole === "" && (
-                <option value="" hidden>
-                  Select an option
-                </option>
-              )}
+              <option value="" hidden>Select Role</option>
               {availableRoles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
+                <option key={role} value={role}>{role}</option>
               ))}
             </select>
           </div>
 
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isLoading}
           >
-            Add User
+            {isLoading ? "Creating..." : "Add User"}
           </button>
         </form>
       </div>
