@@ -19,7 +19,8 @@ const {
     getMyProfile, 
     updateOwnProfile, 
     adminUpdateProfile,
-    deleteProfile
+    deleteProfile,
+    getProfileByEmail
 } = require("../controller/Profile");
 const { addStaff } = require("../controller/addStaff");
 
@@ -51,6 +52,7 @@ router.post("/update-leave-status",
 
 // USER ROUTES
 router.get("/profile", auth, getMyProfile);
+router.get("/profile-by-email", auth, allowRoles(["Principal", "Admin", "HOD"]), getProfileByEmail);
 router.get("/getAllUser", auth, allowRoles(["HOD", "Admin", "Principal"]), getAllUsers);
 router.patch("/update-own-profile", auth, updateOwnProfile);
 router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);

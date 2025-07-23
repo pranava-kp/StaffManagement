@@ -351,3 +351,59 @@ exports.getMyProfile = async (req, res) => {
     });
   }
 };
+
+exports.getProfileByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email query parameter is required",
+      });
+    }
+
+    // Directly use the email as received (no decoding needed)
+    const exactEmail = email.trim();
+    
+    // Debug log to verify what's being searched
+    console.log("Searching for email:", exactEmail);
+
+    const user = await User.findOne({
+      email: exactEmail  // Exact match without any transformation
+    }).select("-password -token");
+
+    if (!user) {
+      // Additional debug to check what emails exist
+      const allUsers = await User.find({});
+      console.log("Existing emails:", allUsers.map(u => u.email));
+      
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      profileData: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        employeeId: user.employeeId,
+        gender: user.gender,
+        department: user.department,
+        accountType: user.accountType,
+        hiringDate: user.hiringDate,
+      },
+    });
+  } catch (error) {
+    console.error("Get profile by email failed:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch profile",
+      error: error.message,
+    });
+  }
+};
