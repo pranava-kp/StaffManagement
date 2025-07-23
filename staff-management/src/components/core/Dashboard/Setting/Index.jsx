@@ -129,82 +129,88 @@ const Setting = () => {
 
       <div className="flex flex-col gap-4 pb-4">
         <form onSubmit={handlePasswordSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-[10%]">
-          <div className="flex flex-col gap-1 relative">
+          <div className="flex flex-col gap-1">
             <label htmlFor="currentPassword" className="text-sm font-medium uppercase text-gray-600">
               Current Password
             </label>
-            <input
-              id="currentPassword"
-              name="currentPassword"
-              type={showCurrentPassword ? "text" : "password"}
-              value={passwordData.currentPassword}
-              onChange={handlePasswordChange}
-              className={`px-4 py-2 w-full bg-white border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            <span
-              onClick={() => setShowCurrentPassword((prev) => !prev)}
-              className="absolute right-3 top-[38px] z-[10] cursor-pointer"
-            >
-              {showCurrentPassword ? (
-                <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-              ) : (
-                <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-              )}
-            </span>
+            <div className="relative">
+              <input
+                id="currentPassword"
+                name="currentPassword"
+                type={showCurrentPassword ? "text" : "password"}
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                className={`px-4 py-2 w-full bg-white border ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              <span
+                onClick={() => setShowCurrentPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+              >
+                {showCurrentPassword ? (
+                  <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
+                ) : (
+                  <AiOutlineEye fontSize={24} fill="#AFB2BF" />
+                )}
+              </span>
+            </div>
             {passwordErrors.currentPassword && (
               <p className="text-red-500 text-xs mt-1">{passwordErrors.currentPassword}</p>
             )}
           </div>
 
-          <div className="flex flex-col gap-1 relative">
+          <div className="flex flex-col gap-1">
             <label htmlFor="newPassword" className="text-sm font-medium uppercase text-gray-600">
               New Password
             </label>
-            <input
-              id="newPassword"
-              name="newPassword"
-              type={showNewPassword ? "text" : "password"}
-              value={passwordData.newPassword}
-              onChange={handlePasswordChange}
-              className={`px-4 py-2 w-full bg-white border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            <span
-              onClick={() => setShowNewPassword((prev) => !prev)}
-              className="absolute right-3 top-[38px] z-[10] cursor-pointer"
-            >
-              {showNewPassword ? (
-                <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-              ) : (
-                <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-              )}
-            </span>
+            <div className="relative">
+              <input
+                id="newPassword"
+                name="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                className={`px-4 py-2 w-full bg-white border ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              <span
+                onClick={() => setShowNewPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+              >
+                {showNewPassword ? (
+                  <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
+                ) : (
+                  <AiOutlineEye fontSize={24} fill="#AFB2BF" />
+                )}
+              </span>
+            </div>
             {passwordErrors.newPassword && (
               <p className="text-red-500 text-xs mt-1">{passwordErrors.newPassword}</p>
             )}
           </div>
 
-          <div className="flex flex-col gap-1 relative">
+          <div className="flex flex-col gap-1">
             <label htmlFor="confirmPassword" className="text-sm font-medium uppercase text-gray-600">
               Confirm New Password
             </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              value={passwordData.confirmPassword}
-              onChange={handlePasswordChange}
-              className={`px-4 py-2 w-full bg-white border ${passwordErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            <span
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-[38px] z-[10] cursor-pointer"
-            >
-              {showConfirmPassword ? (
-                <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-              ) : (
-                <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-              )}
-            </span>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordChange}
+                className={`px-4 py-2 w-full bg-white border ${passwordErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              <span
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+              >
+                {showConfirmPassword ? (
+                  <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
+                ) : (
+                  <AiOutlineEye fontSize={24} fill="#AFB2BF" />
+                )}
+              </span>
+            </div>
             {passwordErrors.confirmPassword && (
               <p className="text-red-500 text-xs mt-1">{passwordErrors.confirmPassword}</p>
             )}
