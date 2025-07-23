@@ -117,7 +117,7 @@ const MyProfile = () => {
         {!isEditing && hasNullValues && (
           <button
             onClick={handleEditClick}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="bg-[rgb(20,20,130)] text-white px-4 py-2 rounded-md hover:bg-[rgb(9,1,95)]"
             disabled={loading}
           >
             Edit Profile

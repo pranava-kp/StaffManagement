@@ -264,7 +264,7 @@ const AddStaff = () => {
 
         <button
           type="submit"
-          className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full ${
+          className={`bg-[rgb(20,20,130)] text-white px-4 py-2 rounded hover:bg-[rgb(9,1,95)] transition-colors w-full ${
             isLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
           disabled={isLoading}
