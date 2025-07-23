@@ -31,3 +31,8 @@ export const updateEndpoints={
     UPDATE_PROFILE : BASE_URL+"/update-own-profile",
    
 }
+
+// DELETE ENDPOINTS
+export const deleteEndpoints={
+    DELETE_PROFILE:BASE_URL+"/delete-user"
+}

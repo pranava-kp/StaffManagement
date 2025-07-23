@@ -1,8 +1,9 @@
 import { apiConnector } from "../apiConnector";
-import { endpoints } from "../apis";
+import { deleteEndpoints, endpoints } from "../apis";
 import { updateEndpoints } from "../apis";
 import { toast } from "react-hot-toast";
 import { userEndpoints } from "../apis";
+
 
 export const getProfileData = async (token) => {
   try {
@@ -108,5 +109,26 @@ export const getAllProfiles = async (token, filters) => {
     console.error("GET_ALL_PROFILES_API ERROR (Frontend):", error);
     toast.error(error.response?.data?.message || "Failed to fetch profiles.");
     return { success: false, message: error.response?.data?.message || "Failed to fetch profiles" };
+  }
+};
+
+export const deleteProfile = async (token, email) => {
+  try {
+    const response = await apiConnector(
+      "DELETE", 
+      deleteEndpoints.DELETE_PROFILE, 
+      { email }, 
+      { Authorization: `Bearer ${token}` }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Deletion failed on backend.");
+    }
+    toast.success("User deleted successfully!");
+    return { success: true };
+  } catch (error) {
+    console.error("DELETE_PROFILE_API ERROR:", error);
+    toast.error(error.response?.data?.message || "Failed to delete user.");
+    throw error; 
   }
 };
