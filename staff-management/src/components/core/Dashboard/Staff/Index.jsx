@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { getAllUserLeaves } from "../../../../services/operations/leaveAPI";
 import LeaveCard from "./LeaveCard";
@@ -10,21 +10,22 @@ const Staff = () => {
     const [leavesData, setLeavesData] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const fetchLeavesTaken = async () => {
+    const fetchLeavesTaken = useCallback(async () => {
         try {
+            setLoading(true);
             const response = await getAllUserLeaves(token);
             setLeavesData(response);
             console.log("All user leaves: ", response.totalLeavesTaken);
         } catch (e) {
             console.log("Error in fetching leaves: ", e);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [token]);
 
     useEffect(() => {
-        setLoading(true);
         fetchLeavesTaken();
-        setLoading(false);
-    }, []);
+    }, [fetchLeavesTaken]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -49,9 +50,6 @@ const Staff = () => {
                     {leavesData &&
                         leavesData.leaves.map((leave) => {
                             return (
-                                // LEAVE KE CARD BNAANE HAI ACCORDINGLY
-                                // SAARE VARIETY KE LIYE,
-
                                 <LeaveCard leave={leave} key={leave._id} />
                             );
                         })}

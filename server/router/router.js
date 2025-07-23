@@ -40,7 +40,8 @@ router.get("/getAllimage", getAllFiles);
 
 // LEAVE ROUTES
 router.post("/createLeave", auth, allowRoles(["Staff", "HOD"]), createLeave);
-router.get("/getAllUserLeaves", auth, isStaff, getAllUserLeaves);
+// Update the leave routes section to:
+router.get("/get-all-leaves", auth, allowRoles(["Staff", "HOD", "Principal"]), getAllUserLeaves);
 // Change the route to a simple POST endpoint
 router.post("/update-leave-status", 
     auth, 

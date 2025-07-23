@@ -17,7 +17,10 @@ curl -X DELETE http://localhost:2000/api/v1/delete-user \
   -H "Authorization: Bearer TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"email": "TARGET_MAIL_ID"}'
-# Login test
+
+
+
+# Login
 curl -X POST http://localhost:2000/api/v1/login \
   -H "Content-Type: application/json" \
   -d '{"email":"john.doe@example.com","password":"securePassword123"}' \
@@ -110,3 +113,35 @@ curl -X POST http://localhost:2000/api/v1/add-user \
     "department": "CSE",
     "accountType": "HOD"
 }'
+
+
+
+## Leaves
+# 1. Creating leave
+curl -X POST "http://localhost:2000/api/v1/createLeave" -H "Authorization: Bearer " -H "Content-Type: application/json" -d '{
+  "subject": "Medical Leave",
+  "body": "I need to take leave for medical reasons",
+  "category": "Medical",
+  "startDate": "2023-12-01",
+  "endDate": "2023-12-03",
+  "substituteTeachers": {}
+}'
+
+# 2. Fetching leaves
+# The query string is optional. if the bearer token belongs to Princiapl, all leaves are fetched by default, howeer, if a HOD sends a request only leaves of that department will be returned. If a Staff makes the call only leave requests by that user will be returned
+curl -X GET "http://localhost:2000/api/v1/get-all-leaves?departments=ECE" \
+-H "Authorization: Bearer TOKEN"
+
+# 3. Updating leave status 
+# This call can be made only by a HOD or Principal
+# i. Approving
+curl -X POST "http://localhost:2000/api/v1/update-leave-status" \
+-H "Authorization: Bearer TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+  "leaveId": "6880c22936e6c74e4eefe6eb",
+  "status": "Approved"
+}'
+
+# ii. Rejecting
+curl -X POST "http://localhost:2000/api/v1/update-leave-status" -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json" -d '{"leaveId": "6880c16c36e6c74e4eefe6cd", "status": "Rejected", "rejectionReason": "Insufficient substitute coverage"}'

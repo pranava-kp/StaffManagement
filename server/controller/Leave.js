@@ -104,21 +104,68 @@ exports.createLeave = async (req, res) => {
 
 exports.getAllUserLeaves = async (req, res) => {
     try {
-        const leaves = await Leave.find({ user: req.user.id });
+        const user = req.user;
+        const { departments } = req.query; // Optional filter for Principal
+        
+        let query = {};
+
+        // For Staff - only show their own leaves
+        if (user.accountType === 'Staff' || user.accountType === 'Teacher') {
+            query.user = user.id;
+        } 
+        // For HOD - only show leaves from their department
+        else if (user.accountType === 'HOD') {
+            const departmentUsers = await User.find({ department: user.department }, '_id');
+            const userIds = departmentUsers.map(user => user._id);
+            query.user = { $in: userIds };
+        } 
+        // For Principal - optional department filter
+        else if (user.accountType === 'Principal') {
+            if (departments) {
+                const departmentArray = Array.isArray(departments) ? departments : [departments];
+                const departmentUsers = await User.find({ department: { $in: departmentArray } }, '_id');
+                const userIds = departmentUsers.map(user => user._id);
+                query.user = { $in: userIds };
+            }
+        }
+        // For other account types (admin, etc.) - return empty by default
+        else {
+            return res.status(403).json({
+                message: "Unauthorized access",
+                success: false,
+            });
+        }
+
+        const leaves = await Leave.find(query).populate({
+            path: 'user',
+            select: 'firstName lastName department email'
+        }).sort({ createdAt: -1 }); // Newest leaves first
+
         const totalLeavesTaken = leaves.reduce((total, leave) => {
             const leaveDuration = Math.ceil((leave.endDate - leave.startDate) / (1000 * 60 * 60 * 24)) + 1;
             return total + leaveDuration;
         }, 0);
 
         return res.status(200).json({
-            message: "All leaves fetched successfully",
-            data: { leaves, totalLeavesTaken },
+            message: "Leaves fetched successfully",
+            data: { 
+                leaves,
+                totalLeavesTaken,
+                // For HOD, show their department
+                // For Principal, show filtered departments if any
+                departmentInfo: user.accountType === 'HOD' ? 
+                    { department: user.department } : 
+                    user.accountType === 'Principal' ? 
+                    { departments: departments || 'all' } :
+                    null
+            },
             success: true,
         });
     } catch (err) {
         console.error("Get leaves error:", err);
         return res.status(500).json({
             message: "Internal server error",
+            error: process.env.NODE_ENV === "development" ? err.message : undefined,
             success: false,
         });
     }
