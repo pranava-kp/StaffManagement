@@ -73,6 +73,7 @@ exports.updateOwnProfile = async (req, res) => {
 
 exports.adminUpdateProfile = async (req, res) => {
   try {
+    console.log("🛑 Received req.body:", req.body);
     const requester = req.user;
     const { id, ...updateData } = req.body;
 
@@ -387,6 +388,7 @@ exports.getProfileByEmail = async (req, res) => {
     return res.status(200).json({
       success: true,
       profileData: {
+        id: user._id, // Added this line to include the MongoDB _id field
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,

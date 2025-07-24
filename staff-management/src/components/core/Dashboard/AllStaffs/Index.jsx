@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { getAllProfiles, deleteProfile } from '../../../../services/operations/profileAPI';
 import { getTokenPayload } from '../../../../utils/jwtUtils';
 import ConfirmationModal from '../../../common/ConfirmationModal';
-import ProfileViewModal from '../../../common/ProfileViewModal';
 
 const AllStaffs = () => {
   const departments = useMemo(() => ["CSE", "ISE", "ME", "ECE"], []);
@@ -22,8 +21,6 @@ const AllStaffs = () => {
   const [initialFiltersSet, setInitialFiltersSet] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [hoveredProfile, setHoveredProfile] = useState(null);
-  const [viewingProfile, setViewingProfile] = useState(null);
 
   const departmentDropdownRef = useRef(null);
   const roleDropdownRef = useRef(null);
@@ -141,10 +138,6 @@ const AllStaffs = () => {
     } else {
       setSelectedRoles(prev => prev.filter(role => role !== value));
     }
-  };
-
-  const handleViewClick = (profile) => {
-    setViewingProfile(profile);
   };
 
   const handleDeleteClick = (profile) => {
@@ -351,13 +344,9 @@ const AllStaffs = () => {
 
                 {(loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal") && (
                   <div className="absolute top-2 right-2 flex gap-1">
-                    {/* View Icon */}
+                    {/* View Icon - now non-functional */}
                     <div 
                       className="cursor-pointer p-1 rounded-full hover:bg-gray-200 transition-colors duration-300 text-gray-500 group-hover:text-[rgb(9,1,95)]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewClick(profile);
-                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -426,13 +415,6 @@ const AllStaffs = () => {
           btn2Text="Delete"
           btn1Handler={handleCancelDelete}
           btn2Handler={handleConfirmDelete}
-        />
-      )}
-
-      {viewingProfile && (
-        <ProfileViewModal
-          profile={viewingProfile}
-          onClose={() => setViewingProfile(null)}
         />
       )}
     </div>
