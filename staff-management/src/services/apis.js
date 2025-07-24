@@ -7,6 +7,7 @@ export const endpoints = {
     LOGIN_API: BASE_URL + "/login",
     GENERATE_OTP: BASE_URL + "/generate-otp",
     PROFILE_API: "/profile",
+    GET_PROFILE_BY_EMAIL: BASE_URL + "/profile-by-email",
 };
 
 // PROFILE IMAGE ENDPOINTS
@@ -27,12 +28,12 @@ export const userEndpoints = {
 }
 
 //UPDATE ENDPOINTS
-export const updateEndpoints={
-    UPDATE_PROFILE : BASE_URL+"/update-own-profile",
-   
-}
+export const updateEndpoints = {
+    UPDATE_PROFILE: "/update-profile",       // For users updating their own profile
+    ADMIN_UPDATE_PROFILE: "/admin-update-profile"  // For admin updates
+};
 
 // DELETE ENDPOINTS
-export const deleteEndpoints={
-    DELETE_PROFILE:BASE_URL+"/delete-user"
+export const deleteEndpoints = {
+    DELETE_PROFILE: BASE_URL + "/delete-user"
 }

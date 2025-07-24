@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import { getAllProfiles, deleteProfile } from '../../../../services/operations/profileAPI';
 import { getTokenPayload } from '../../../../utils/jwtUtils';
 import ConfirmationModal from '../../../common/ConfirmationModal';
+import ProfileViewModal from '../../../common/ProfileViewModal';
+import { getProfileByEmail } from '../../../../services/operations/profileAPI';
 
 const AllStaffs = () => {
   const departments = useMemo(() => ["CSE", "ISE", "ME", "ECE"], []);
@@ -21,7 +23,8 @@ const AllStaffs = () => {
   const [initialFiltersSet, setInitialFiltersSet] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-
+  const [viewProfileModal, setViewProfileModal] = useState(false);
+  const [selectedProfileEmail, setSelectedProfileEmail] = useState(null);
   const departmentDropdownRef = useRef(null);
   const roleDropdownRef = useRef(null);
 
@@ -345,8 +348,13 @@ const AllStaffs = () => {
                 {(loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal") && (
                   <div className="absolute top-2 right-2 flex gap-1">
                     {/* View Icon - now non-functional */}
-                    <div 
+                    <div
                       className="cursor-pointer p-1 rounded-full hover:bg-gray-200 transition-colors duration-300 text-gray-500 group-hover:text-[rgb(9,1,95)]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProfileEmail(profile.email);
+                        setViewProfileModal(true);
+                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -415,6 +423,13 @@ const AllStaffs = () => {
           btn2Text="Delete"
           btn1Handler={handleCancelDelete}
           btn2Handler={handleConfirmDelete}
+        />
+      )}
+      {viewProfileModal && (
+        <ProfileViewModal
+          isOpen={viewProfileModal}
+          onClose={() => setViewProfileModal(false)}
+          profileEmail={selectedProfileEmail}
         />
       )}
     </div>

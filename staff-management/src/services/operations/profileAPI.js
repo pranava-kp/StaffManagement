@@ -132,3 +132,79 @@ export const deleteProfile = async (token, email) => {
     throw error; 
   }
 };
+// Add these to profileAPI.js
+export const getProfileByEmail = async (token, email) => {
+  try {
+    const response = await apiConnector(
+      "GET",
+      endpoints.GET_PROFILE_BY_EMAIL,
+      null,
+      {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      { email }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+
+    // Normalize field names
+    const normalizedProfile = {
+      ...response.data.profileData,
+      phoneNumber: response.data.profileData.phone
+    };
+
+    return {
+      success: true,
+      profileData: normalizedProfile
+    };
+  } catch (error) {
+    console.error("GET_PROFILE_BY_EMAIL_API ERROR:", error);
+    throw error;
+  }
+};
+
+// In profileAPI.js - remove the duplicate function at the bottom
+// Keep only this one:
+export const adminUpdateProfile = async (token, data) => {
+  try {
+    // Transform data for backend
+    const backendData = {
+      ...data,
+      phone: data.phoneNumber
+    };
+    delete backendData.phoneNumber;
+
+    const response = await apiConnector(
+      "PATCH",
+      updateEndpoints.ADMIN_UPDATE_PROFILE,
+      backendData,
+      {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+
+    // Normalize response for frontend
+    const normalizedResponse = {
+      ...response.data.data,
+      phoneNumber: response.data.data.phone
+    };
+
+    toast.success("Profile updated successfully!");
+    return {
+      success: true,
+      updatedProfile: normalizedResponse
+    };
+  } catch (error) {
+    console.error("ADMIN_UPDATE_PROFILE_API ERROR:", error);
+    toast.error(error.response?.data?.message || "Failed to update profile");
+    throw error;
+  }
+};
