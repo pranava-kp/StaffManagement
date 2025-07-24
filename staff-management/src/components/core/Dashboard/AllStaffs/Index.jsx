@@ -32,7 +32,7 @@ const AllStaffs = () => {
     if (loggedInUserAccountType === "Principal") {
       return ["HOD", "Admin", "Staff"];
     } else if (loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD") {
-      return ["Staff"];
+      return ["Admin", "Staff"];
     }
     return [];
   }, [loggedInUserAccountType]);
@@ -50,7 +50,7 @@ const AllStaffs = () => {
         if (!initialFiltersSet) {
           if (userPayload.accountType === "Admin" || userPayload.accountType === "HOD") {
             setSelectedDepartments(userPayload.department ? [userPayload.department] : []);
-            setSelectedRoles(["Staff"]);
+            setSelectedRoles([]); // No roles selected by default
           } else if (userPayload.accountType === "Principal") {
             setSelectedDepartments([]);
             setSelectedRoles([]);
@@ -91,11 +91,8 @@ const AllStaffs = () => {
         departmentsToFetch = selectedDepartments.length > 0 ? selectedDepartments : departments;
       }
 
-      if (loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD") {
-        rolesToFetch = ["Staff"];
-      } else if (loggedInUserAccountType === "Principal") {
-        rolesToFetch = selectedRoles.length > 0 ? selectedRoles : availableRoles;
-      }
+      // If no roles are selected, fetch all available roles
+      rolesToFetch = selectedRoles.length > 0 ? selectedRoles : availableRoles;
 
       if (departmentsToFetch.length === 0 && loggedInUserAccountType !== "Principal") {
         setProfileFetchError("Department information missing for your role.");
@@ -228,14 +225,14 @@ const AllStaffs = () => {
       <p className="border-b-2 w-full p-3 text-xl font-semibold">All Staff Profiles</p>
 
       <div className="flex flex-wrap gap-4 p-4 bg-white rounded-md shadow-sm items-center">
-        <div className="flex flex-col gap-1 min-w-[200px]">
+        <div className="flex flex-col gap-1 w-[250px]">
           <label className="text-sm font-medium text-gray-700">Department:</label>
           {(loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD") ? (
             <input
               type="text"
               id="department-display"
               value={loggedInUserDepartment || "N/A"}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-200 text-gray-700 font-semibold cursor-not-allowed"
+              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-200 text-gray-700 font-semibold cursor-not-allowed w-full"
               disabled
             />
           ) : (
@@ -278,54 +275,44 @@ const AllStaffs = () => {
           )}
         </div>
 
-        <div className="flex flex-col gap-1 min-w-[200px]">
+        <div className="flex flex-col gap-1 w-[250px]">
           <label className="text-sm font-medium text-gray-700">Role:</label>
-          {(loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD") ? (
-            <input
-              type="text"
-              id="role-display"
-              value="Staff"
-              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-200 text-gray-700 font-semibold cursor-not-allowed"
-              disabled
-            />
-          ) : (
-            <div className="relative" ref={roleDropdownRef}>
-              <div
-                className="flex justify-between items-center block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                onClick={() => setShowRoleDropdown(prev => !prev)}
+          <div className="relative" ref={roleDropdownRef}>
+            <div
+              className="flex justify-between items-center block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              onClick={() => setShowRoleDropdown(prev => !prev)}
+            >
+              {selectedRoles.length === 0
+                ? "All Roles"
+                : selectedRoles.join(", ")
+              }
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`h-4 w-4 transform transition-transform duration-200 ${showRoleDropdown ? 'rotate-180' : 'rotate-0'}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                {selectedRoles.length === 0
-                  ? "All Roles"
-                  : selectedRoles.join(", ")
-                }
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-4 w-4 transform transition-transform duration-200 ${showRoleDropdown ? 'rotate-180' : 'rotate-0'}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-              {showRoleDropdown && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                  {availableRoles.map(role => (
-                    <label key={role} className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        value={role}
-                        checked={selectedRoles.includes(role)}
-                        onChange={handleRoleCheckboxChange}
-                        className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out rounded focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-gray-700">{role}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-          )}
+            {showRoleDropdown && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                {availableRoles.map(role => (
+                  <label key={role} className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      value={role}
+                      checked={selectedRoles.includes(role)}
+                      onChange={handleRoleCheckboxChange}
+                      className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out rounded focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-gray-700">{role}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -347,7 +334,6 @@ const AllStaffs = () => {
 
                 {(loggedInUserAccountType === "Admin" || loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal") && (
                   <div className="absolute top-2 right-2 flex gap-1">
-                    {/* View Icon - now non-functional */}
                     <div
                       className="cursor-pointer p-1 rounded-full hover:bg-gray-200 transition-colors duration-300 text-gray-500 group-hover:text-[rgb(9,1,95)]"
                       onClick={(e) => {
@@ -378,7 +364,6 @@ const AllStaffs = () => {
                       </svg>
                     </div>
 
-                    {/* Delete Icon */}
                     <div
                       className="cursor-pointer p-1 rounded-full hover:bg-gray-200 transition-colors duration-300 text-gray-500 group-hover:text-red-500"
                       onClick={(e) => {
