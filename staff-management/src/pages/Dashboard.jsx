@@ -1,23 +1,30 @@
-import React from "react";
-// import { useSelector } from "react-redux";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import SideBar from "../components/core/Dashboard/SideBar";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const Dashboard = () => {
-    // const { loading: authLoading } = useSelector((state) => state.auth);
-    // const { loading: profileLoading } = useSelector((state) => state.profile);
-
-    // if (authLoading || profileLoading) {
-    //     return (
-    //             <LoadingSpinner/>
-    //     );
-    // }
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="relative flex min-h-[calc(100vh-3.5rem)]">
-            <SideBar />
-            <div className="h-[calc(100vh-3.5rem)] w-full overflow-auto bg-white">
+        <div className="flex flex-1 relative">
+            {/* Mobile overlay */}
+            {sidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+            
+            {/* Sidebar */}
+            <div className={`fixed md:relative z-50 h-[calc(100vh-3.5rem)] transition-all duration-300 ease-in-out ${
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            }`}>
+                <SideBar onClose={() => setSidebarOpen(false)} />
+            </div>
+            
+            {/* Main content */}
+            <div className="flex-1 h-[calc(100vh-3.5rem)] w-full overflow-auto bg-white">
                 <div className="mx-auto w-11/12 max-w-[1000px] py-10">
                     <Outlet/>
                 </div>

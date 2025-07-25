@@ -1,9 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/Forgot"; // Add this import
-import Navbar from "./components/common/Navbar";
-import Dashboard from "./pages/Dashboard";
+import ForgotPassword from "./pages/Forgot";
+import DashboardLayout from "./components/core/Dashboard/DashboardLayout";
 import OpenRoute from "./components/core/Auth/OpenRoute";
 import PrivateRoute from "./components/core/Auth/PrivateRoute";
 import { ACCOUNT_TYPE } from "./utils/constants";
@@ -20,9 +19,7 @@ function App() {
     
     return (
         <div className="flex flex-col min-h-screen">
-            <Navbar />
             <Routes>
-                {/* Redirect root path to /login */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 
                 <Route
@@ -41,7 +38,6 @@ function App() {
                         </OpenRoute>
                     }
                 />
-                {/* Add this new route */}
                 <Route
                     path="/forgot-password"
                     element={
@@ -50,10 +46,12 @@ function App() {
                         </OpenRoute>
                     }
                 />
+                
+                {/* All dashboard routes */}
                 <Route
                     element={
                         <PrivateRoute>
-                            <Dashboard />
+                            <DashboardLayout />
                         </PrivateRoute>
                     }
                 >
@@ -75,7 +73,6 @@ function App() {
                     )}
                 </Route>
                 
-                {/* Optional: Add a catch-all route for 404 pages */}
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </div>

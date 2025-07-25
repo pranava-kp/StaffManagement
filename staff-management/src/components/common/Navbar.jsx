@@ -1,14 +1,18 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setToken } from "../../services/slices/authSlice";
 import { toast } from "react-hot-toast";
 import logo from '../../assets/images/rns-logo.webp';
+import { FiMenu } from "react-icons/fi";
 
-const Navbar = () => {
+const Navbar = ({ setSidebarOpen = () => {} }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { token } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
+    
+    const isDashboardRoute = location.pathname.startsWith('/dashboard');
     
     const logOutHandler = () => {
         localStorage.removeItem("token");
@@ -19,15 +23,24 @@ const Navbar = () => {
 
     return (
         <div className="h-[3.5rem] bg-[rgb(252,101,1)] flex items-center px-4">
-            <div className="flex items-center flex-1">
+            <div className="flex items-center gap-4 flex-1">
+                {/* Only show hamburger menu on dashboard routes */}
+                {isDashboardRoute && (
+                    <button 
+                        className="md:hidden text-white text-2xl"
+                        onClick={() => setSidebarOpen(prev => !prev)}
+                    >
+                        <FiMenu />
+                    </button>
+                )}
                 <img 
                     src={logo} 
                     alt="RNS" 
                     className="h-10 mr-3" 
                 />
-                <div className="text-2xl font-bold salsa text-gray-100 ">
-                        Staff Leave Portal
-                    </div>
+                <div className="text-2xl font-bold salsa text-gray-100">
+                    Staff Leave Portal
+                </div>
             </div>
             
             {token && (
