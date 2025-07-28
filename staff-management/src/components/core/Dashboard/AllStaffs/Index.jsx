@@ -4,7 +4,7 @@ import { getAllProfiles, deleteProfile } from '../../../../services/operations/p
 import { getTokenPayload } from '../../../../utils/jwtUtils';
 import ConfirmationModal from '../../../common/ConfirmationModal';
 import ProfileViewModal from '../../../common/ProfileViewModal';
-import { getProfileByEmail } from '../../../../services/operations/profileAPI';
+//import { getProfileByEmail } from '../../../../services/operations/profileAPI';
 
 const AllStaffs = () => {
   const departments = useMemo(() => ["CSE", "ISE", "ME", "ECE"], []);

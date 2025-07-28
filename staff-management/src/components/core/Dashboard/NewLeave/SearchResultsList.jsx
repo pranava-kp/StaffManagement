@@ -4,14 +4,14 @@ const SearchResultsList = ({
     results,
     onSelectSubstituteTeacher,
 }) => {
-    //  TEST DATA
+      /*TEST DATA
 
-    // const newResults = [
-    //     {
-    //         firstName: "John",
-    //         lastName: "Doe",
-    //     },
-    //     {
+     const newResults = [
+         {
+            firstName: "John",
+            lastName: "Doe",
+        },
+        {
     //         firstName: "Jane",
     //         lastName: "Doe",
     //     },
@@ -34,6 +34,7 @@ const SearchResultsList = ({
     // ];
 
     // console.log("Results: ", results);
+*/
 
     return (
         results.length > 0 && (

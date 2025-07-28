@@ -20,7 +20,8 @@ export const imageDetails = {
 // LEAVE ENDPOINTS
 export const leaveEndpoints = {
     CREATE_LEAVE: BASE_URL + "/createLeave",
-    GET_ALL_USER_LEAVES: BASE_URL + "/getAllUserLeaves",
+    GET_ALL_USER_LEAVES: BASE_URL + "/get-all-leaves",
+    GRANT_USER_LEAVE:BASE_URL+"/update-leave-status"
 }
 
 export const userEndpoints = {
@@ -30,7 +31,7 @@ export const userEndpoints = {
 //UPDATE ENDPOINTS
 export const updateEndpoints = {
     UPDATE_PROFILE: "/update-profile",       // For users updating their own profile
-    ADMIN_UPDATE_PROFILE: "/admin-update-profile"  // For admin updates
+    ADMIN_UPDATE_PROFILE: "/admin-update-profile"
 };
 
 // DELETE ENDPOINTS
