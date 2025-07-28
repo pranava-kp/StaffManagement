@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/Forgot";
@@ -13,15 +13,21 @@ import NewLeave from "./components/core/Dashboard/NewLeave/Index";
 import AllStaffs from "./components/core/Dashboard/AllStaffs/Index";
 import Setting from "./components/core/Dashboard/Setting/Index";
 import Staff from "./components/core/Dashboard/Staff/Index";
+import Navbar from "./components/common/Navbar";
 
 function App() {
+    const location = useLocation();
+    const isDashboardRoute = location.pathname.startsWith('/dashboard');
+
     const user = { accountType: "Staff" };
-    
+
     return (
         <div className="flex flex-col min-h-screen">
+            {!isDashboardRoute && <Navbar />}
+
             <Routes>
                 <Route path="/" element={<Navigate to="/login" replace />} />
-                
+
                 <Route
                     path="/login"
                     element={
@@ -46,8 +52,7 @@ function App() {
                         </OpenRoute>
                     }
                 />
-                
-                {/* All dashboard routes */}
+
                 <Route
                     element={
                         <PrivateRoute>
@@ -57,22 +62,17 @@ function App() {
                 >
                     <Route path="/dashboard/my-profile" element={<MyProfile />} />
                     <Route path="/dashboard/settings" element={<Setting />} />
-                    
+
                     {user?.accountType === ACCOUNT_TYPE.STAFF && (
                         <>
                             <Route path="/dashboard/new-leave" element={<NewLeave />} />
                             <Route path="/dashboard/staff" element={<Staff />} />
-                        </>
-                    )}
-
-                    {user?.accountType === ACCOUNT_TYPE.STAFF && (
-                        <>
                             <Route path="/dashboard/add-staff" element={<AddStaff />} />
                             <Route path="/dashboard/all-staffs" element={<AllStaffs />} />
                         </>
                     )}
                 </Route>
-                
+
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </div>
