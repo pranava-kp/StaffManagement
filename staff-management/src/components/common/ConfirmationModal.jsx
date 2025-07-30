@@ -22,7 +22,7 @@ const ConfirmationModal = ({
           ) : (
             <div className='text-gray-600'>{text2}</div>
           )}
-          
+
           <div className='flex justify-end gap-3 mt-4'>
             <button
               onClick={btn1Handler}
@@ -32,7 +32,10 @@ const ConfirmationModal = ({
               {btn1Text}
             </button>
             <button
-              onClick={btn2Handler}
+              onClick={() => {
+                console.log("Confirm Reject clicked", { isProcessing }); // Debug log
+                if (btn2Handler) btn2Handler();
+              }}
               className='px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors'
               disabled={isProcessing}
             >

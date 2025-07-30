@@ -110,39 +110,35 @@ const Staff = () => {
     };
   }, [showDepartmentDropdown]);
 
-  const handleProcessLeave = (leave, type, reason = "") => {
+  const handleProcessLeave = (leave, type, reason = "", fromDetailsModal = false) => {
     setIsProcessingLeave(true);
     setLeaveToProcess(leave);
     setActionType(type);
 
     if (type === "reject") {
-      if (reason) {
-        // Direct rejection (from LeaveDetailsModal)
+      if (reason || fromDetailsModal) {
         handleConfirmProcessLeave(leave, type, reason);
       } else {
-        // Show modal to get reason (from LeaveCard)
         setShowRejectionModal(true);
       }
     } else {
-      // Approval flow
       handleConfirmProcessLeave(leave, type);
     }
   };
 
   const handleConfirmProcessLeave = async (leave, type, reason = "") => {
+    console.log("Starting leave processing", { leave, type, reason, isProcessingLeave }); // Debug
     try {
       const status = type === "approve" ? "Approved" : "Rejected";
       await updateLeaveStatus(token, leave._id, status, reason);
+      console.log("Leave processed successfully", { status }); // Debug
 
-      // Refresh leaves data
       await fetchLeavesTaken();
 
-      // Close all modals
       setShowRejectionModal(false);
       setShowLeaveDetailsModal(false);
       setSelectedLeaveForDetails(null);
 
-      // Reset state
       setLeaveToProcess(null);
       setRejectionReason("");
 
@@ -151,6 +147,7 @@ const Staff = () => {
       console.error("Error processing leave:", error);
       toast.error(`Failed to ${type} leave. Please try again.`);
     } finally {
+      console.log("Processing complete", { isProcessingLeave }); // Debug
       setIsProcessingLeave(false);
     }
   };
@@ -340,12 +337,12 @@ const Staff = () => {
             <div className="flex flex-col gap-2">
               <p>Are you sure you want to reject this leave request?</p>
               <textarea
-                placeholder="Reason for rejection (required)"
+                placeholder="Reason for rejection (optional)"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                 rows="3"
-                required
+                disabled={isProcessingLeave}
               />
             </div>
           }
@@ -353,11 +350,8 @@ const Staff = () => {
           btn2Text="Confirm Reject"
           btn1Handler={handleCancelProcessLeave}
           btn2Handler={() => {
-            if (!rejectionReason) {
-              toast.error("Please provide a rejection reason");
-              return;
-            }
-            handleConfirmProcessLeave(leaveToProcess, "reject", rejectionReason);
+            console.log("Confirm Reject from Index.jsx", { leaveToProcess, rejectionReason, isProcessingLeave }); // Debug log
+            handleConfirmProcessLeave(leaveToProcess, "reject", rejectionReason || "");
           }}
           isProcessing={isProcessingLeave}
         />

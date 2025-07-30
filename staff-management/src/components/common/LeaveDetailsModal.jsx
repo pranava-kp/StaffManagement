@@ -11,11 +11,8 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
   };
 
   const handleConfirmReject = () => {
-    if (!rejectionReason) {
-      toast.error("Please provide a rejection reason");
-      return;
-    }
-    onProcessLeave(leave, "reject", rejectionReason);
+    console.log("handleConfirmReject called", { leave, rejectionReason, isProcessing });
+    onProcessLeave(leave, "reject", rejectionReason || "", true); // Pass true for fromDetailsModal
     setShowRejectionConfirmation(false);
     setRejectionReason("");
   };

@@ -85,14 +85,16 @@ export async function getAllUserLeaves(token, filters = {}) {
 export async function updateLeaveStatus(token, leaveId, status, rejectionReason = "") {
   const toastId = toast.loading("Updating leave status...");
   try {
+    const payload = {
+      leaveId,
+      status,
+      rejectionReason: status === "Rejected" ? rejectionReason : undefined
+    };
+    console.log("Sending payload:", payload); // Debug payload
     const response = await apiConnector(
       "POST", 
       GRANT_USER_LEAVE, 
-      {
-        leaveId,
-        status,
-        ...(status === "Rejected" && { rejectionReason }) // Only include for rejections
-      },
+      payload,
       {
         Authorization: `Bearer ${token.replace(/^"|"$/g, "")}`,
       }
