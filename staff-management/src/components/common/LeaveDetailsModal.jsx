@@ -1,20 +1,23 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
+import { toast } from "react-hot-toast";
 import ConfirmationModal from "./ConfirmationModal";
-const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcessLeave }) => {
-    const [rejectionReason, setRejectionReason] = useState("");
-    const [showRejectionConfirmation, setShowRejectionConfirmation] = useState(false);
-    if (!isOpen || !leave) return null;
-
-  
+const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcessLeave, isProcessing }) => {
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [showRejectionConfirmation, setShowRejectionConfirmation] = useState(false);
+  if (!isOpen || !leave) return null;
 
   const handleRejectClick = () => {
     setShowRejectionConfirmation(true);
   };
 
   const handleConfirmReject = () => {
+    if (!rejectionReason) {
+      toast.error("Please provide a rejection reason");
+      return;
+    }
     onProcessLeave(leave, "reject", rejectionReason);
     setShowRejectionConfirmation(false);
-    onClose(); // Close the details modal after action
+    setRejectionReason("");
   };
 
   const handleCancelRejectConfirmation = () => {
@@ -24,7 +27,7 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
 
   const handleApproveClick = () => {
     onProcessLeave(leave, "approve");
-    onClose(); // Close the details modal after action
+    onClose();
   };
 
   return (
@@ -35,6 +38,7 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
+            disabled={isProcessing}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -47,11 +51,10 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
           {leave.user && (
             <p><strong>Applied By:</strong> {leave.user.firstName} {leave.user.lastName} ({leave.user.department})</p>
           )}
-          <p><strong>Status:</strong> <span className={`font-bold ${
-            leave.status === "Pending" ? "text-yellow-600" :
+          <p><strong>Status:</strong> <span className={`font-bold ${leave.status === "Pending" ? "text-yellow-600" :
             leave.status === "Approved" ? "text-green-600" :
-            "text-red-600"
-          }`}>{leave.status}</span></p>
+              "text-red-600"
+            }`}>{leave.status}</span></p>
           <p><strong>Category:</strong> {leave.category}</p>
           <p><strong>From:</strong> {new Date(leave.startDate).toLocaleDateString('en-GB')}</p>
           <p><strong>To:</strong> {new Date(leave.endDate).toLocaleDateString('en-GB')}</p>
@@ -64,12 +67,14 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
             <button
               onClick={handleApproveClick}
               className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+              disabled={isProcessing}
             >
               Approve
             </button>
             <button
               onClick={handleRejectClick}
               className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+              disabled={isProcessing}
             >
               Reject
             </button>
@@ -89,13 +94,15 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
                   onChange={(e) => setRejectionReason(e.target.value)}
                   className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                   rows="3"
+                  disabled={isProcessing}
                 />
               </div>
             }
             btn1Text="Cancel"
             btn2Text="Confirm Reject"
             btn1Handler={handleCancelRejectConfirmation}
-            btn2Handler={handleConfirmReject}
+            btn2Handler={handleConfirmReject}  // Remove the arrow function here
+            isProcessing={isProcessing}
           />
         )}
       </div>

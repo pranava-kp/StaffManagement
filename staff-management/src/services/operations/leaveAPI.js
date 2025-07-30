@@ -3,48 +3,48 @@ import { setLoading } from "../slices/authSlice";
 import { leaveEndpoints } from "../apis";
 import { apiConnector } from "../apiConnector";
 
-const { CREATE_LEAVE, GET_ALL_USER_LEAVES,GRANT_USER_LEAVE } = leaveEndpoints;
+const { CREATE_LEAVE, GET_ALL_USER_LEAVES, GRANT_USER_LEAVE } = leaveEndpoints;
 
 export function createLeave(
-    subject,
-    body,
-    startDate,
-    endDate,
-    category,
-    substituteTeachers,
-    token
+  subject,
+  body,
+  startDate,
+  endDate,
+  category,
+  substituteTeachers,
+  token
 ) {
-    return async (dispatch) => {
-        const toastId = toast.loading("Loading...");
-        dispatch(setLoading(true));
-        try {
-            const response = await apiConnector(
-                "POST",
-                CREATE_LEAVE,
-                {
-                    subject,
-                    body,
-                    startDate,
-                    endDate,
-                    category,
-                    substituteTeachers
-                },
-                {
-                    Authorization: `Bearer ${token}`,
-                }
-            );
-            console.log(response);
-            if (!response.data.success) {
-                throw new Error(response.data.message);
-            }
-            toast.success("Leave created successfully");
-        } catch (error) {
-            toast.error("Cannot create leave: " + error);
-            console.log(error);
+  return async (dispatch) => {
+    const toastId = toast.loading("Loading...");
+    dispatch(setLoading(true));
+    try {
+      const response = await apiConnector(
+        "POST",
+        CREATE_LEAVE,
+        {
+          subject,
+          body,
+          startDate,
+          endDate,
+          category,
+          substituteTeachers
+        },
+        {
+          Authorization: `Bearer ${token}`,
         }
-        dispatch(setLoading(false));
-        toast.dismiss(toastId);
-    };
+      );
+      console.log(response);
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+      toast.success("Leave created successfully");
+    } catch (error) {
+      toast.error("Cannot create leave: " + error);
+      console.log(error);
+    }
+    dispatch(setLoading(false));
+    toast.dismiss(toastId);
+  };
 }
 
 export async function getAllUserLeaves(token, filters = {}) {
@@ -85,19 +85,25 @@ export async function getAllUserLeaves(token, filters = {}) {
 export async function updateLeaveStatus(token, leaveId, status, rejectionReason = "") {
   const toastId = toast.loading("Updating leave status...");
   try {
-    const response = await apiConnector("POST", GRANT_USER_LEAVE, {
-      leaveId,
-      status,
-      rejectionReason,
-    }, {
-      Authorization: `Bearer ${token}`,
-    });
+    const response = await apiConnector(
+      "POST", 
+      GRANT_USER_LEAVE, 
+      {
+        leaveId,
+        status,
+        ...(status === "Rejected" && { rejectionReason }) // Only include for rejections
+      },
+      {
+        Authorization: `Bearer ${token.replace(/^"|"$/g, "")}`,
+      }
+    );
 
     console.log("updateLeaveStatus (API) response:", response);
 
     if (!response.data.success) {
       throw new Error(response.data.message || "Failed to update leave status.");
     }
+
     toast.success(`Leave ${status.toLowerCase()} successfully`);
     return response.data.data;
   } catch (error) {

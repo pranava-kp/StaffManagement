@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback,useMemo,useRef } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { getAllUserLeaves } from "../../../../services/operations/leaveAPI";
 import LeaveCard from "./LeaveCard";
 import { getTokenPayload } from '../../../../utils/jwtUtils';
 import { toast } from "react-hot-toast";
-import {updateLeaveStatus} from "../../../../services/operations/leaveAPI";
+import { updateLeaveStatus } from "../../../../services/operations/leaveAPI";
 import LeaveDetailsModal from "../../../common/LeaveDetailsModal"
 import ConfirmationModal from "../../../common/ConfirmationModal";
 
@@ -73,7 +73,7 @@ const Staff = () => {
       console.log("Fetched leaves data: ", response);
     } catch (e) {
       console.log("Error in fetching leaves: ", e);
-      setLeavesData(null); 
+      setLeavesData(null);
     } finally {
       setLoading(false);
     }
@@ -110,44 +110,55 @@ const Staff = () => {
     };
   }, [showDepartmentDropdown]);
 
-  const handleProcessLeave = (leave, type) => {
-    setIsProcessingLeave(true); 
+  const handleProcessLeave = (leave, type, reason = "") => {
+    setIsProcessingLeave(true);
     setLeaveToProcess(leave);
     setActionType(type);
+
     if (type === "reject") {
-      setShowRejectionModal(true);
+      if (reason) {
+        // Direct rejection (from LeaveDetailsModal)
+        handleConfirmProcessLeave(leave, type, reason);
+      } else {
+        // Show modal to get reason (from LeaveCard)
+        setShowRejectionModal(true);
+      }
     } else {
-      handleConfirmProcessLeave(leave, type, "");
+      // Approval flow
+      handleConfirmProcessLeave(leave, type);
     }
   };
 
   const handleConfirmProcessLeave = async (leave, type, reason = "") => {
-    setShowRejectionModal(false);
-   
     try {
-      await updateLeaveStatus(token, leave._id, type === "approve" ? "Approved" : "Rejected", reason);
-      
-      await fetchLeavesTaken(); 
+      const status = type === "approve" ? "Approved" : "Rejected";
+      await updateLeaveStatus(token, leave._id, status, reason);
 
+      // Refresh leaves data
+      await fetchLeavesTaken();
+
+      // Close all modals
+      setShowRejectionModal(false);
+      setShowLeaveDetailsModal(false);
+      setSelectedLeaveForDetails(null);
+
+      // Reset state
       setLeaveToProcess(null);
       setRejectionReason("");
-      // Close details modal if it was open
-      if (showLeaveDetailsModal) {
-        setShowLeaveDetailsModal(false);
-        setSelectedLeaveForDetails(null);
-      }
+
+      toast.success(`Leave ${status.toLowerCase()} successfully`);
     } catch (error) {
-      
+      console.error("Error processing leave:", error);
+      toast.error(`Failed to ${type} leave. Please try again.`);
     } finally {
-      setIsProcessingLeave(false); 
+      setIsProcessingLeave(false);
     }
   };
-
   const handleCancelProcessLeave = () => {
     setShowRejectionModal(false);
     setLeaveToProcess(null);
     setRejectionReason("");
-    setIsProcessingLeave(false); 
+    setIsProcessingLeave(false);
   };
 
   const handleViewLeaveDetails = (leave) => {
@@ -168,10 +179,10 @@ const Staff = () => {
   }
 
   //not yet implemented
-/*   const totalLeavesDisplay = (loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") ?
-    `Total Pending Leaves: ${leavesData ? leavesData.leaves.filter(l => l.status === 'Pending').length : 0}` :
-    `Total leaves Taken: ${leavesData ? leavesData.totalLeavesTaken : 0}`;
- */
+  /*   const totalLeavesDisplay = (loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") ?
+      `Total Pending Leaves: ${leavesData ? leavesData.leaves.filter(l => l.status === 'Pending').length : 0}` :
+      `Total leaves Taken: ${leavesData ? leavesData.totalLeavesTaken : 0}`;
+   */
   const leavesGreaterThanTwoWeeks = [];
   const otherLeaves = [];
 
@@ -238,7 +249,7 @@ const Staff = () => {
             </div>
           )}
 
-        
+
           {(loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") && leavesData && leavesData.leaves.length > 0 && (
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Leaves &gt; 2 Weeks (High Priority)</h3>
@@ -290,7 +301,7 @@ const Staff = () => {
                     canApproveReject={true}
                     onProcessLeave={handleProcessLeave}
                     onViewDetails={handleViewLeaveDetails}
-                    isProcessing={isProcessingLeave} 
+                    isProcessing={isProcessingLeave}
                   />
                 ))}
               </div>
@@ -320,7 +331,7 @@ const Staff = () => {
         </div>
       </div>
 
-  
+
       {showRejectionModal && (
         <ConfirmationModal
           isOpen={showRejectionModal}
@@ -329,24 +340,30 @@ const Staff = () => {
             <div className="flex flex-col gap-2">
               <p>Are you sure you want to reject this leave request?</p>
               <textarea
-                placeholder="Reason for rejection (optional)"
+                placeholder="Reason for rejection (required)"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                 rows="3"
-                disabled={isProcessingLeave}
+                required
               />
             </div>
           }
           btn1Text="Cancel"
           btn2Text="Confirm Reject"
           btn1Handler={handleCancelProcessLeave}
-          btn2Handler={() => handleConfirmProcessLeave(leaveToProcess, actionType, rejectionReason)}
+          btn2Handler={() => {
+            if (!rejectionReason) {
+              toast.error("Please provide a rejection reason");
+              return;
+            }
+            handleConfirmProcessLeave(leaveToProcess, "reject", rejectionReason);
+          }}
           isProcessing={isProcessingLeave}
         />
       )}
 
-      
+
       {showLeaveDetailsModal && selectedLeaveForDetails && (
         <LeaveDetailsModal
           isOpen={showLeaveDetailsModal}
