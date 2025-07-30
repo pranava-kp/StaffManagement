@@ -1,6 +1,6 @@
 import React from "react";
 
-const LeaveCard = ({ leave, canApproveReject, onProcessLeave, onViewDetails }) => {
+const LeaveCard = ({ leave, canApproveReject, onProcessLeave, onViewDetails, isProcessing }) => {
   console.log("LeaveCard: leave prop received: ", leave);
   return (
     <div className={`w-full border p-4 flex flex-col gap-3 rounded-md shadow-md ${
@@ -8,10 +8,11 @@ const LeaveCard = ({ leave, canApproveReject, onProcessLeave, onViewDetails }) =
         leave.status === "Approved" ? "bg-green-50 border-green-300" :
         "bg-red-50 border-red-300"
     } relative`}>
-      
+        
         <div 
           className="absolute top-2 right-2 cursor-pointer p-1 rounded-full hover:bg-gray-200 transition-colors duration-200"
           onClick={() => onViewDetails(leave)}
+          style={{ pointerEvents: isProcessing ? 'none' : 'auto' }} 
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -19,14 +20,14 @@ const LeaveCard = ({ leave, canApproveReject, onProcessLeave, onViewDetails }) =
           </svg>
         </div>
 
-        
+       
         {leave.user && (
             <div className="text-lg font-bold text-gray-800">
                 {leave.user.firstName} {leave.user.lastName}
             </div>
         )}
 
-       
+    
         <div className="font-semibold text-gray-700">
             Status:{" "}
             <span
@@ -42,7 +43,7 @@ const LeaveCard = ({ leave, canApproveReject, onProcessLeave, onViewDetails }) =
             </span>
         </div>
         
-        
+       
         <div className="flex gap-4">
             <div>
                 <table>
@@ -70,5 +71,4 @@ const LeaveCard = ({ leave, canApproveReject, onProcessLeave, onViewDetails }) =
     </div>
   );
 };
-
 export default LeaveCard;

@@ -11,7 +11,7 @@ import ConfirmationModal from "../../../common/ConfirmationModal";
 const Staff = () => {
   const { token } = useSelector((state) => state.auth);
   const [leavesData, setLeavesData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Main loading state for initial fetch
 
   const [loggedInUserAccountType, setLoggedInUserAccountType] = useState(null);
   const [loggedInUserDepartment, setLoggedInUserDepartment] = useState(null);
@@ -29,6 +29,8 @@ const Staff = () => {
 
   const [showLeaveDetailsModal, setShowLeaveDetailsModal] = useState(false);
   const [selectedLeaveForDetails, setSelectedLeaveForDetails] = useState(null);
+
+  const [isProcessingLeave, setIsProcessingLeave] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -61,11 +63,10 @@ const Staff = () => {
       if (loggedInUserAccountType === "HOD") {
         filters.departments = [loggedInUserDepartment];
         filters.status = "Pending";
-      } else if (loggedInUserAccountType === "Principal"){
-        filters.departments = selectedDepartments.length > 0 ? selectedDepartments:departments ;
+      } else if (loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") {
+        filters.departments = selectedDepartments.length > 0 ? selectedDepartments : departments;
         filters.status = "Pending";
       }
-      
 
       const response = await getAllUserLeaves(token, filters);
       setLeavesData(response);
@@ -110,6 +111,7 @@ const Staff = () => {
   }, [showDepartmentDropdown]);
 
   const handleProcessLeave = (leave, type) => {
+    setIsProcessingLeave(true); 
     setLeaveToProcess(leave);
     setActionType(type);
     if (type === "reject") {
@@ -121,19 +123,23 @@ const Staff = () => {
 
   const handleConfirmProcessLeave = async (leave, type, reason = "") => {
     setShowRejectionModal(false);
-    setLoading(true);
+   
     try {
-      const updatedLeave = await updateLeaveStatus(token, leave._id, type === "approve" ? "Approved" : "Rejected", reason);
+      await updateLeaveStatus(token, leave._id, type === "approve" ? "Approved" : "Rejected", reason);
       
-      setLeavesData(prevData => ({
-        ...prevData,
-        leaves: prevData.leaves.map(l => l._id === updatedLeave._id ? updatedLeave : l)
-      }));
+      await fetchLeavesTaken(); 
+
       setLeaveToProcess(null);
       setRejectionReason("");
+      // Close details modal if it was open
+      if (showLeaveDetailsModal) {
+        setShowLeaveDetailsModal(false);
+        setSelectedLeaveForDetails(null);
+      }
     } catch (error) {
+      
     } finally {
-      setLoading(false);
+      setIsProcessingLeave(false); 
     }
   };
 
@@ -141,6 +147,7 @@ const Staff = () => {
     setShowRejectionModal(false);
     setLeaveToProcess(null);
     setRejectionReason("");
+    setIsProcessingLeave(false); 
   };
 
   const handleViewLeaveDetails = (leave) => {
@@ -160,11 +167,11 @@ const Staff = () => {
     return <div className="p-4 text-center text-red-500">Authentication data not ready. Please log in.</div>;
   }
 
-  // to be implemented
-  /* const totalLeavesDisplay = (loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") ?
+  //not yet implemented
+/*   const totalLeavesDisplay = (loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") ?
     `Total Pending Leaves: ${leavesData ? leavesData.leaves.filter(l => l.status === 'Pending').length : 0}` :
-    `Total leaves Taken: ${leavesData ? leavesData.totalLeavesTaken : 0}`; */
-
+    `Total leaves Taken: ${leavesData ? leavesData.totalLeavesTaken : 0}`;
+ */
   const leavesGreaterThanTwoWeeks = [];
   const otherLeaves = [];
 
@@ -231,7 +238,7 @@ const Staff = () => {
             </div>
           )}
 
-         
+        
           {(loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin") && leavesData && leavesData.leaves.length > 0 && (
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Leaves &gt; 2 Weeks (High Priority)</h3>
@@ -244,6 +251,7 @@ const Staff = () => {
                       canApproveReject={true}
                       onProcessLeave={handleProcessLeave}
                       onViewDetails={handleViewLeaveDetails}
+                      isProcessing={isProcessingLeave} // Pass processing state
                     />
                   ))
                 ) : (
@@ -261,6 +269,7 @@ const Staff = () => {
                       canApproveReject={true}
                       onProcessLeave={handleProcessLeave}
                       onViewDetails={handleViewLeaveDetails}
+                      isProcessing={isProcessingLeave}
                     />
                   ))
                 ) : (
@@ -281,6 +290,7 @@ const Staff = () => {
                     canApproveReject={true}
                     onProcessLeave={handleProcessLeave}
                     onViewDetails={handleViewLeaveDetails}
+                    isProcessing={isProcessingLeave} 
                   />
                 ))}
               </div>
@@ -297,6 +307,7 @@ const Staff = () => {
                     key={leave._id}
                     canApproveReject={false}
                     onViewDetails={handleViewLeaveDetails}
+                    isProcessing={isProcessingLeave} // Pass processing state
                   />
                 ))}
               </div>
@@ -304,12 +315,12 @@ const Staff = () => {
           )}
 
           {leavesData && leavesData.leaves.length === 0 && (
-            <div className="text-center text-gray-600 mt-8">No leaves</div>
+            <div className="text-center text-gray-600 mt-8">No leaves to display based on current filters/role.</div>
           )}
         </div>
       </div>
 
-      
+  
       {showRejectionModal && (
         <ConfirmationModal
           isOpen={showRejectionModal}
@@ -323,6 +334,7 @@ const Staff = () => {
                 onChange={(e) => setRejectionReason(e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                 rows="3"
+                disabled={isProcessingLeave}
               />
             </div>
           }
@@ -330,6 +342,7 @@ const Staff = () => {
           btn2Text="Confirm Reject"
           btn1Handler={handleCancelProcessLeave}
           btn2Handler={() => handleConfirmProcessLeave(leaveToProcess, actionType, rejectionReason)}
+          isProcessing={isProcessingLeave}
         />
       )}
 
@@ -341,6 +354,7 @@ const Staff = () => {
           leave={selectedLeaveForDetails}
           canApproveReject={loggedInUserAccountType === "HOD" || loggedInUserAccountType === "Principal" || loggedInUserAccountType === "Admin"}
           onProcessLeave={handleProcessLeave}
+          isProcessing={isProcessingLeave}
         />
       )}
     </div>
