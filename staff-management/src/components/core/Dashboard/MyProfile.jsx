@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { getProfileData, updateProfileData } from '../../../services/operations/profileAPI';
+import { apiConnector } from "../../../services/apiConnector";
+import toast from "react-hot-toast";
 import ConfirmationModal from '../../common/ConfirmationModal';
 
 const MyProfile = () => {
@@ -90,17 +92,29 @@ const MyProfile = () => {
       const dataToUpdate = {
         employeeId: editableProfileData.employeeId,
         gender: editableProfileData.gender,
-        phoneNumber: editableProfileData.phoneNumber,
+        phone: editableProfileData.phoneNumber, // Note: using 'phone' instead of 'phoneNumber'
       };
 
-      const response = await updateProfileData(token, dataToUpdate);
-      if (response.success) {
+      // Directly call apiConnector with the correct endpoint
+      const response = await apiConnector(
+        "PATCH",
+        "/update-own-profile", // Correct endpoint
+        dataToUpdate,
+        {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      );
+
+      if (response.data.success) {
         await fetchProfile(); // Full refresh after update
         setIsEditing(false);
         setHasNullValues(false);
+        toast.success("Profile updated successfully!");
       }
     } catch (err) {
       console.error(err.message || 'Failed to update profile.');
+      toast.error(err.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
