@@ -11,7 +11,7 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
   };
 
   const handleConfirmReject = () => {
-    console.log("handleConfirmReject called", { leave, rejectionReason, isProcessing });
+    // console.log("handleConfirmReject called", { leave, rejectionReason, isProcessing });
     onProcessLeave(leave, "reject", rejectionReason || "", true); // Pass true for fromDetailsModal
     setShowRejectionConfirmation(false);
     setRejectionReason("");

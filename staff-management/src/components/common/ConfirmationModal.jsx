@@ -33,7 +33,7 @@ const ConfirmationModal = ({
             </button>
             <button
               onClick={() => {
-                console.log("Confirm Reject clicked", { isProcessing }); // Debug log
+                // console.log("Confirm Reject clicked", { isProcessing }); // Debug log
                 if (btn2Handler) btn2Handler();
               }}
               className='px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors'

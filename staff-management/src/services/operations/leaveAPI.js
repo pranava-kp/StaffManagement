@@ -90,7 +90,7 @@ export async function updateLeaveStatus(token, leaveId, status, rejectionReason 
       status,
       rejectionReason: status === "Rejected" ? rejectionReason : undefined
     };
-    console.log("Sending payload:", payload); // Debug payload
+    // console.log("Sending payload:", payload); // Debug payload
     const response = await apiConnector(
       "POST", 
       GRANT_USER_LEAVE, 
@@ -100,7 +100,7 @@ export async function updateLeaveStatus(token, leaveId, status, rejectionReason 
       }
     );
 
-    console.log("updateLeaveStatus (API) response:", response);
+    // console.log("updateLeaveStatus (API) response:", response);
 
     if (!response.data.success) {
       throw new Error(response.data.message || "Failed to update leave status.");

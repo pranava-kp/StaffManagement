@@ -127,11 +127,11 @@ const Staff = () => {
   };
 
   const handleConfirmProcessLeave = async (leave, type, reason = "") => {
-    console.log("Starting leave processing", { leave, type, reason, isProcessingLeave }); // Debug
+    // console.log("Starting leave processing", { leave, type, reason, isProcessingLeave }); // Debug
     try {
       const status = type === "approve" ? "Approved" : "Rejected";
       await updateLeaveStatus(token, leave._id, status, reason);
-      console.log("Leave processed successfully", { status }); // Debug
+      // console.log("Leave processed successfully", { status }); // Debug
 
       await fetchLeavesTaken();
 
@@ -147,7 +147,7 @@ const Staff = () => {
       console.error("Error processing leave:", error);
       toast.error(`Failed to ${type} leave. Please try again.`);
     } finally {
-      console.log("Processing complete", { isProcessingLeave }); // Debug
+      // console.log("Processing complete", { isProcessingLeave }); // Debug
       setIsProcessingLeave(false);
     }
   };
