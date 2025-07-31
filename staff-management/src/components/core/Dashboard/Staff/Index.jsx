@@ -57,7 +57,7 @@ const Staff = () => {
       return;
     }
 
-    setLoading(true);
+     setLoading(true);
     try {
       let filters = {};
       if (loggedInUserAccountType === "HOD") {
@@ -67,13 +67,12 @@ const Staff = () => {
         filters.departments = selectedDepartments.length > 0 ? selectedDepartments : departments;
         filters.status = "Pending";
       }
-
       const response = await getAllUserLeaves(token, filters);
       setLeavesData(response);
       console.log("Fetched leaves data: ", response);
     } catch (e) {
       console.log("Error in fetching leaves: ", e);
-      setLeavesData(null);
+      setLeavesData(null); // Clear data on error
     } finally {
       setLoading(false);
     }
