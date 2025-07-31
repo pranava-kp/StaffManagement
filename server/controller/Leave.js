@@ -122,7 +122,7 @@ exports.getAllUserLeaves = async (req, res) => {
         // For Principal - optional department filter
         else if (user.accountType === 'Principal') {
             if (departments) {
-                const departmentArray = Array.isArray(departments) ? departments : [departments];
+                const departmentArray = departments.split(','); // Consistent with getAllUsers
                 const departmentUsers = await User.find({ department: { $in: departmentArray } }, '_id');
                 const userIds = departmentUsers.map(user => user._id);
                 query.user = { $in: userIds };
