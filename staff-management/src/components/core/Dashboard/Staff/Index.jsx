@@ -11,7 +11,7 @@ import ConfirmationModal from "../../../common/ConfirmationModal";
 const Staff = () => {
   const { token } = useSelector((state) => state.auth);
   const [leavesData, setLeavesData] = useState(null);
-  const [loading, setLoading] = useState(true); // Main loading state for initial fetch
+  const [loading, setLoading] = useState(true); 
 
   const [loggedInUserAccountType, setLoggedInUserAccountType] = useState(null);
   const [loggedInUserDepartment, setLoggedInUserDepartment] = useState(null);
