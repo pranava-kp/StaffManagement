@@ -1,37 +1,37 @@
-import { ACCOUNT_TYPE } from "../utils/constants";
 export const sidebarLinks = [
     {
         id: 1,
         name: "Dashboard",
         path: "/dashboard/staff",
-        type: ACCOUNT_TYPE.STAFF,
         icon: "VscDashboard",
+        roles: ["Admin", "HOD", "Principal", "Staff"], 
     },
     {
         id: 2,
         name: "My Profile",
         path: "/dashboard/my-profile",
         icon: "VscAccount",
+        roles: ["Admin", "HOD", "Principal", "Staff"],
     },
     {
         id: 3,
         name: "New Leave",
         path: "/dashboard/new-leave",
-        type: ACCOUNT_TYPE.STAFF,
         icon: "VscRepo",
+        roles: ["Admin", "HOD", "Principal", "Staff"], 
     },
     {
         id: 4,
         name: "Add Staff",
         path: "/dashboard/add-staff",
-        type: ACCOUNT_TYPE.ADMIN,
         icon: "VscPersonAdd",
+        roles: ["Admin", "Principal", "HOD"],
     },
     {
         id: 5,
         name: "All Staffs",
         path: "/dashboard/all-staffs",
-        type: ACCOUNT_TYPE.ADMIN,
         icon: "VscOrganization",
+        roles: ["Admin", "Principal", "HOD"],
     },
 ];
