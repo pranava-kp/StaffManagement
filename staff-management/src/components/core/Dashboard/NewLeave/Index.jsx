@@ -1,70 +1,85 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import rnsLogo from "../../../../assets/images/rns-logo.webp";
-import { FaSearch } from "react-icons/fa";
 import { createLeave } from "../../../../services/operations/leaveAPI";
-import SubstituteDayBox from "./SubstituteDayBox";
 
 const NewLeave = () => {
-    const [substituteTeachers, setSubstituteTeachers] = useState({});
+    const [substituteTeachers] = useState({});
     const { token } = useSelector((state) => state.auth);
     const [loading, setLoading] = useState(false);
-    const [substitutionBox, setSubstitutionBox] = useState(false);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         subject: "",
         body: "",
-        startDate: null,
-        endDate: null,
+        startDate: "",
+        endDate: "",
         category: "",
-        substituteTeachers: substituteTeachers,
+        otherCategory: "",
     });
 
+    // For calendar controlled values
+    const [startDateObj, setStartDateObj] = useState(null);
+    const [endDateObj, setEndDateObj] = useState(null);
+
+    const getYesterday = () => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return yesterday;
+    };
+
+    const formatForApi = (dateObj) => {
+        if (!dateObj) return "";
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const day = String(dateObj.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`; // yyyy-mm-dd (local date, no UTC shift)
+    };
+
     const handleOnChange = (e) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            [e.target.name]: e.target.value,
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
         }));
     };
-    const { subject, body, startDate, endDate, category } = formData;
-    const differenceMs = new Date(endDate) - new Date(startDate);
-    const differenceDays =
-        differenceMs / (1000 * 60 * 60 * 24) >= 0
-            ? differenceMs / (1000 * 60 * 60 * 24) + 1
-            : parseInt(0);
-    console.log("Difference Days: ", differenceDays);
 
-    const dayValueChanger = (day, newTeacherArray) =>{
-        setSubstituteTeachers(prevSubTeachers => ({
-            ...prevSubTeachers,
-            ["Day"+day]: newTeacherArray
-          }));
-          console.log("All Teachers:",substituteTeachers)
-    }
-
-
-    // Update substituteTeachers state based on date changes
-    useEffect(() => {
-        if (differenceDays > 0) {
-            const newSubstituteTeachers = {};
-            for (let i = 0; i < differenceDays; i++) {
-                newSubstituteTeachers[`Day${i + 1}`] = { teachers: [] };
-            }
-            setSubstituteTeachers(newSubstituteTeachers);
-            // setSubstitutionBox(true)
-            console.log("All Substitute Teachers: ", newSubstituteTeachers);
-        }
-    }, [startDate, endDate, differenceDays]);
-
-    const handleOnSubmit = (e) => {
+    const handleOnSubmit = async (e) => {
         e.preventDefault();
-        console.log("Sub Teachers: ", substituteTeachers)
-        console.log("form data:", formData);
+        const { subject, body, category, otherCategory } = formData;
+
+        if (category === "Others" && !otherCategory.trim()) {
+            alert("Please specify the leave type when selecting 'Others'");
+            return;
+        }
+
+        const apiStartDate = formatForApi(startDateObj);
+        const apiEndDate = formatForApi(endDateObj);
+
         setLoading(true);
         try {
-            dispatch(
-                createLeave(subject, body, startDate, endDate, category, substituteTeachers, token)
+            const result = await dispatch(
+                createLeave(
+                    subject,
+                    body,
+                    apiStartDate,
+                    apiEndDate,
+                    category === "Others" ? otherCategory : category,
+                    substituteTeachers,
+                    token
+                )
             );
+
+            console.log("createLeave result:", result);
+
+            if (result?.success) {
+                navigate("/dashboard/staff");
+            }
+
         } catch (e) {
             console.log("Error in creating leave: ", e);
         }
@@ -74,37 +89,30 @@ const NewLeave = () => {
     return (
         <div className="flex flex-col border p-5 bg-gray-100 gap-8 w-full rounded-md">
             <div className="flex justify-between text-3xl font-semibold">
-                <img src={rnsLogo} alt="" className=" self-start w-10" />
+                <img src={rnsLogo} alt="" className="self-start w-10" />
                 Leave Application
                 <div></div>
             </div>
-            <form onSubmit={handleOnSubmit} className=" flex flex-col gap-4">
-
-                {/* SUBJECT */}
+            <form onSubmit={handleOnSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                    <label
-                        htmlFor="subject"
-                        className=" text-sm font-semibold uppercase"
-                    >
-                        Subject<sup className=" text-pink-500"> *</sup>
+                    <label htmlFor="subject" className="text-sm font-semibold uppercase">
+                        Subject<sup className="text-pink-500"> *</sup>
                     </label>
                     <input
                         type="text"
                         name="subject"
                         id="subject"
                         placeholder="Enter Subject"
-                        className=" bg-white px-4 py-2 rounded"
+                        className="bg-white px-4 py-2 rounded"
                         onChange={handleOnChange}
+                        value={formData.subject}
+                        required
                     />
                 </div>
 
-                {/* BODY */}
                 <div className="flex flex-col gap-1">
-                    <label
-                        htmlFor="body"
-                        className=" text-sm font-semibold uppercase"
-                    >
-                        Detailed Reason<sup className=" text-pink-500"> *</sup>
+                    <label htmlFor="body" className="text-sm font-semibold uppercase">
+                        Detailed Reason<sup className="text-pink-500"> *</sup>
                     </label>
                     <textarea
                         onChange={handleOnChange}
@@ -113,120 +121,107 @@ const NewLeave = () => {
                         cols="40"
                         rows="10"
                         placeholder="Enter Detailed Reason"
-                        className=" bg-white px-4 py-2 rounded"
+                        className="bg-white px-4 py-2 rounded"
+                        value={formData.body}
+                        required
                     ></textarea>
                 </div>
 
-                {/* DATES */}
                 <div className="flex flex-row justify-between items-center">
                     <div className="flex gap-20">
                         <div className="flex flex-col">
-                            <label
-                                htmlFor="startdate"
-                                className=" text-sm font-semibold uppercase"
-                            >
-                                From<sup className=" text-pink-500">*</sup>
+                            <label className="text-sm font-semibold uppercase">
+                                From<sup className="text-pink-500">*</sup>
                             </label>
-                            <input
-                                type="date"
-                                name="startDate"
-                                id="startDate"
-                                className=" max-w-max bg-transparent border text-gray-600 text-sm border-gray-200"
-                                onChange={handleOnChange}
+                            <DatePicker
+                                selected={startDateObj}
+                                onChange={(date) => {
+                                    setStartDateObj(date);
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        startDate: formatForApi(date)
+                                    }));
+                                    if (date && (!endDateObj || date > endDateObj)) {
+                                        setEndDateObj(date);
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            endDate: formatForApi(date)
+                                        }));
+                                    }
+                                }}
+                                dateFormat="dd/MM/yyyy"
+                                placeholderText="dd/mm/yyyy"
+                                minDate={getYesterday()}
+                                className="max-w-max bg-white border text-gray-600 text-sm border-gray-200 px-2 py-1"
+                                required
                             />
                         </div>
+
                         <div className="flex flex-col">
-                            <label
-                                htmlFor="endDate"
-                                className=" text-sm font-semibold uppercase"
-                            >
-                                To<sup className=" text-pink-500">*</sup>
+                            <label className="text-sm font-semibold uppercase">
+                                To<sup className="text-pink-500">*</sup>
                             </label>
-                            <input
-                                type="date"
-                                name="endDate"
-                                id="endDate"
-                                className=" max-w-max bg-transparent border text-gray-600 text-sm border-gray-200 custom-inpt"
-                                onChange={handleOnChange}
+                            <DatePicker
+                                selected={endDateObj}
+                                onChange={(date) => {
+                                    setEndDateObj(date);
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        endDate: formatForApi(date)
+                                    }));
+                                }}
+                                dateFormat="dd/MM/yyyy"
+                                placeholderText="dd/mm/yyyy"
+                                minDate={startDateObj || getYesterday()}
+                                className="max-w-max bg-white border text-gray-600 text-sm border-gray-200 px-2 py-1"
+                                required
                             />
                         </div>
                     </div>
 
-                    {/* LEAVE TYPE */}
-                    <div>
-                        <label
-                            htmlFor="category"
-                            className=" text-sm font-semibold uppercase"
-                        >
-                            Leave Type<sup className=" text-pink-500">*</sup>:{" "}
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="category" className="text-sm font-semibold uppercase">
+                            Leave Type<sup className="text-pink-500">*</sup>:
                         </label>
                         <select
                             name="category"
                             id="category"
-                            className=" border border-gray-200 px-2 py-1"
+                            className="border border-gray-200 px-2 py-1"
                             onChange={handleOnChange}
-                            defaultValue={"Select Leave Type"}
+                            value={formData.category}
+                            required
                         >
-                            <option disabled>Select Leave Type</option>
-                            <option value="Emergency Leave">
-                                Emergency Leave
+                            <option value="" disabled hidden>
+                                Select Leave Type
                             </option>
+                            <option value="Emergency Leave">Emergency Leave</option>
                             <option value="Casual Leave">Casual Leave</option>
                             <option value="Others">Others</option>
                         </select>
-                    </div>
-                </div>
 
-                {/* YES OR NO FOR PERIODS */}
-                <div>
-                    <div>
-                        <h2>Do you have class on any of these days?</h2>
-                        <div className="flex gap-4">
-                            <input
-                                type="radio"
-                                name="class"
-                                id="yes"
-                                value="yes"
-                                onClick={() => setSubstitutionBox(true)}
-                            />
-                            <label htmlFor="yes">Yes</label>
-                            <input
-                                type="radio"
-                                name="class"
-                                id="no"
-                                value="no"
-                                onClick={() => setSubstitutionBox(false)}
-                            />
-                            <label htmlFor="no">No</label>
-                        </div>
-                        {/* Substitute Teacher Box */}
-                        {substitutionBox && (
-                            <div>
-                                <h2
-                                    htmlFor="substituteTeachers"
-                                    className=" text-sm font-semibold uppercase mt-4"
-                                >
-                                    Substitute Teacher
-                                    <sup className=" text-pink-500">*</sup>
-                                </h2>
-                                {Object.keys(substituteTeachers).map((dayData, i) => (
-                                    <SubstituteDayBox
-                                        key={i}
-                                        day={i+1}
-                                        dayData={dayData}
-                                        token={token}
-                                        substituteTeachers={substituteTeachers}
-                                        setSubstituteTeachers={setSubstituteTeachers}
-                                        dayValueChanger={dayValueChanger}
-                                    />
-                                ))}
+                        {formData.category === "Others" && (
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    name="otherCategory"
+                                    id="otherCategory"
+                                    placeholder="Specify leave type"
+                                    className="bg-white px-4 py-2 rounded w-full"
+                                    onChange={handleOnChange}
+                                    value={formData.otherCategory}
+                                    required
+                                />
                             </div>
                         )}
                     </div>
                 </div>
+
                 <div className="mx-auto mt-4">
-                    <button className="text-gray-100 font-semibold text-lg bg-rnsit-blue px-4 py-2 rounded-md">
-                        Submit
+                    <button
+                        className="text-gray-100 font-semibold text-lg bg-rnsit-blue px-4 py-2 rounded-md"
+                        disabled={loading}
+                    >
+                        {loading ? "Submitting..." : "Submit"}
                     </button>
                 </div>
             </form>
@@ -235,22 +230,3 @@ const NewLeave = () => {
 };
 
 export default NewLeave;
-
-
-// SAMPLE DATA OF SUBSTITUTE TEACHER
-
-// const substitute Teachers data=
-// [
-//     // day 1:
-//     day1:{
-//         teachers:[
-//             {teach1}, {teach2}
-//         ]
-//     },
-//     // day 2:
-//     day2:{
-//         teachers:[
-//             {teach1}, {teach2}
-//         ]
-//     }
-// ]

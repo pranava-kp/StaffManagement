@@ -4,7 +4,7 @@ export const sidebarLinks = [
         name: "Dashboard",
         path: "/dashboard/staff",
         icon: "VscDashboard",
-        roles: ["Admin", "HOD", "Principal", "Staff"], 
+        roles: ["HOD", "Principal", "Staff"], 
     },
     {
         id: 2,
@@ -18,7 +18,7 @@ export const sidebarLinks = [
         name: "New Leave",
         path: "/dashboard/new-leave",
         icon: "VscRepo",
-        roles: ["Admin", "HOD", "Principal", "Staff"], 
+        roles: ["HOD", "Staff"], 
     },
     {
         id: 4,

@@ -33,19 +33,31 @@ export function createLeave(
           Authorization: `Bearer ${token}`,
         }
       );
-      console.log(response);
+
+      console.log("Create leave API response:", response);
+
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
+
       toast.success("Leave created successfully");
+
+      // ✅ Return the API response so NewLeave can use result.success
+      return response.data;
+
     } catch (error) {
       toast.error("Cannot create leave: " + error);
-      console.log(error);
+      console.log("Error in createLeave:", error);
+
+      // Return an error object so NewLeave can detect failure
+      return { success: false, message: error.message };
+    } finally {
+      dispatch(setLoading(false));
+      toast.dismiss(toastId);
     }
-    dispatch(setLoading(false));
-    toast.dismiss(toastId);
   };
 }
+
 
 export async function getAllUserLeaves(token, filters = {}) {
   const toastId = toast.loading("Loading leaves...");
@@ -92,8 +104,8 @@ export async function updateLeaveStatus(token, leaveId, status, rejectionReason 
     };
     // console.log("Sending payload:", payload); // Debug payload
     const response = await apiConnector(
-      "POST", 
-      GRANT_USER_LEAVE, 
+      "POST",
+      GRANT_USER_LEAVE,
       payload,
       {
         Authorization: `Bearer ${token.replace(/^"|"$/g, "")}`,
