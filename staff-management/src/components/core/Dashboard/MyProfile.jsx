@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { getProfileData, updateProfileData } from '../../../services/operations/profileAPI';
+import { getProfileData/*, updateProfileData */} from '../../../services/operations/profileAPI';
 import { apiConnector } from "../../../services/apiConnector";
 import toast from "react-hot-toast";
 import ConfirmationModal from '../../common/ConfirmationModal';
