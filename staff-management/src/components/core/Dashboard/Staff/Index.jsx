@@ -25,7 +25,7 @@ const Staff = () => {
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [leaveToProcess, setLeaveToProcess] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
-  const [/*actionType,*/ setActionType] = useState("");
+  const [actionType, setActionType] = useState("");
 
   const [showLeaveDetailsModal, setShowLeaveDetailsModal] = useState(false);
   const [selectedLeaveForDetails, setSelectedLeaveForDetails] = useState(null);
