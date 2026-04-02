@@ -33,6 +33,10 @@ curl -X POST http://localhost:2000/api/v1/login \
 curl -X GET "http://localhost:2000/api/v1/getAllUser?accountTypes=Admin,HOD&departments=CSE,ECE" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
+# GET Staff Names and associated department
+curl -X GET http://localhost:2000/api/v1/getuserdept \
+  -H "Authorization: Bearer TOKEN"
+
 # Logout test
 curl -X POST http://localhost:2000/api/v1/logout \
   -H "Authorization: Bearer TOKEN" \
@@ -120,15 +124,28 @@ curl -X POST http://localhost:2000/api/v1/add-user \
 
 ## Leaves
 # 1. Creating leave
-curl -X POST "http://localhost:2000/api/v1/createLeave" -H "Authorization: Bearer " -H "Content-Type: application/json" -d '{
-  "subject": "Medical Leave",
-  "body": "I need to take leave for medical reasons",
-  "category": "Medical",
-  "startDate": "2023-12-01",
-  "endDate": "2023-12-03",
-  "substituteTeachers": {}
-}'
 
+# --- IMPORTANT NOTES ---
+# substituteTeachers: This field expects a JSON string mapping the exact date (YYYY-MM-DD) 
+# to a specific class hour, which is then mapped to the substitute teacher's MongoDB Object ID.
+# Example: '{"2026-03-10": {"1": "687f57b...", "2": "687f57c..."}, "2026-03-12": {"4": "687f57d..."}}'
+#
+# Terminal Formatting: Always wrap the substituteTeachers JSON in single quotes ('') 
+# to prevent your terminal from misinterpreting the double quotes inside the JSON.
+# 
+# File Uploads: The supportDocument path MUST be prefixed with an '@' symbol.
+
+curl -X POST http://localhost:2000/api/v1/createLeave \
+  -H "Authorization: Bearer <YOUR_TOKEN>" \
+  -F "category=<LEAVE_CATEGORY>" \
+  -F "subject=<SUBJECT_LINE>" \
+  -F "body=<LEAVE_DESCRIPTION>" \
+  -F "startDate=<YYYY-MM-DD>" \
+  -F "endDate=<YYYY-MM-DD>" \
+  -F 'substituteTeachers={"<YYYY-MM-DD>": {"<HOUR>": "<TEACHER_OBJECT_ID>"}}' \
+  -F "supportDocument=@<FULL_FILE_PATH_HERE>"
+
+  
 # 2. Fetching leaves
 # The query string is optional. if the bearer token belongs to Princiapl, all leaves are fetched by default, howeer, if a HOD sends a request only leaves of that department will be returned. If a Staff makes the call only leave requests by that user will be returned
 curl -X GET "http://localhost:2000/api/v1/get-all-leaves?departments=ECE" \
@@ -147,3 +164,8 @@ curl -X POST "http://localhost:2000/api/v1/update-leave-status" \
 
 # ii. Rejecting
 curl -X POST "http://localhost:2000/api/v1/update-leave-status" -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json" -d '{"leaveId": "6880c16c36e6c74e4eefe6cd", "status": "Rejected", "rejectionReason": "Insufficient substitute coverage"}'
+
+# 4. Fetching remaining leaves balance
+# This fetches the user's current leave balances for all leave types.
+curl -X GET "http://localhost:2000/api/v1/get-remaining-leaves" \
+-H "Authorization: Bearer TOKEN"

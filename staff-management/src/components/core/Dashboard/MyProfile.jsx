@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { getProfileData/*, updateProfileData */} from '../../../services/operations/profileAPI';
+import { getProfileData } from '../../../services/operations/profileAPI';
 import { apiConnector } from "../../../services/apiConnector";
 import toast from "react-hot-toast";
 import ConfirmationModal from '../../common/ConfirmationModal';
@@ -92,13 +92,12 @@ const MyProfile = () => {
       const dataToUpdate = {
         employeeId: editableProfileData.employeeId,
         gender: editableProfileData.gender,
-        phone: editableProfileData.phoneNumber, // Note: using 'phone' instead of 'phoneNumber'
+        phone: editableProfileData.phoneNumber,
       };
 
-      // Directly call apiConnector with the correct endpoint
       const response = await apiConnector(
         "PATCH",
-        "/update-own-profile", // Correct endpoint
+        "/update-own-profile",
         dataToUpdate,
         {
           Authorization: `Bearer ${token}`,
@@ -107,7 +106,7 @@ const MyProfile = () => {
       );
 
       if (response.data.success) {
-        await fetchProfile(); // Full refresh after update
+        await fetchProfile();
         setIsEditing(false);
         setHasNullValues(false);
         toast.success("Profile updated successfully!");
@@ -120,18 +119,27 @@ const MyProfile = () => {
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading profile...</div>;
-  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
-  if (!profile) return <div className="p-4">No profile data available</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+    </div>
+  );
+  if (error) return <div className="p-4 text-red-500 bg-red-50 rounded-lg border border-red-100">Error: {error}</div>;
+  if (!profile) return <div className="p-4 text-gray-500 text-center mt-10">No profile data available</div>;
 
   return (
-    <div className="flex flex-col border bg-gray-100 gap-8 w-full rounded-md p-6 relative">
-      <div className="flex justify-between items-center border-b-2 w-full p-3 border-gray-300">
-        <p className="text-xl font-semibold">My Profile</p>
+    <div className="flex flex-col w-full relative animate-fadeIn">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Personal Information</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage your staff details and contact info.</p>
+        </div>
+        
         {!isEditing && hasNullValues && (
           <button
             onClick={handleEditClick}
-            className="bg-[rgb(20,20,130)] text-white px-4 py-2 rounded-md hover:bg-[rgb(9,1,95)]"
+            className="w-full sm:w-auto bg-rnsit-blue text-white px-6 py-2.5 rounded-xl hover:bg-rnsit-blue/90 transition-all duration-300 font-medium shadow-md shadow-blue-900/10"
             disabled={loading}
           >
             Edit Profile
@@ -140,7 +148,7 @@ const MyProfile = () => {
         {isEditing && (
           <button
             onClick={handlePreSaveValidation}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+            className="w-full sm:w-auto bg-orange-500 text-white px-6 py-2.5 rounded-xl hover:bg-orange-600 transition-all duration-300 font-medium shadow-md shadow-orange-500/20"
             disabled={loading}
           >
             {loading ? 'Saving...' : 'Save Changes'}
@@ -148,7 +156,10 @@ const MyProfile = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-[10%]">
+      <div className="w-full h-[1px] bg-gray-100 mb-8"></div>
+
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
         <ProfileField
           label="First Name"
           name="firstName"
@@ -242,6 +253,7 @@ const MyProfile = () => {
   );
 };
 
+// Extracted and Modernized Field Component
 const ProfileField = ({
   label,
   name,
@@ -253,13 +265,12 @@ const ProfileField = ({
   options = [],
   isInvalid = false,
 }) => {
-  const baseClasses =
-    'px-4 py-2 w-full bg-white border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500';
-  const borderColor = isInvalid ? 'border-red-500' : 'border-gray-300';
+  const baseInputClasses = "w-full px-4 py-3 rounded-xl border bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all duration-200 shadow-sm";
+  const borderColor = isInvalid ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-orange-500';
 
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium uppercase text-gray-600">
+    <div className="flex flex-col gap-2 w-full">
+      <label htmlFor={name} className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">
         {label}
       </label>
       {isEditing && !readOnly ? (
@@ -269,7 +280,7 @@ const ProfileField = ({
             name={name}
             value={value}
             onChange={onChange}
-            className={`${baseClasses} ${borderColor}`}
+            className={`${baseInputClasses} ${borderColor}`}
           >
             <option value="" disabled hidden>
               Select {label}
@@ -287,16 +298,17 @@ const ProfileField = ({
             type={type}
             value={value}
             onChange={onChange}
-            className={`${baseClasses} ${borderColor}`}
+            className={`${baseInputClasses} ${borderColor}`}
+            placeholder={`Enter ${label.toLowerCase()}`}
           />
         )
       ) : (
-        <div className="px-4 py-2 min-w-[350px] bg-gray-300 border border-gray-300 rounded-md text-gray-700">
-          {value || 'Not available'}
+        <div className="w-full px-4 py-3 rounded-xl bg-gray-50/80 border border-gray-100 text-gray-800 text-sm font-medium shadow-sm transition-all duration-300">
+          {value ? value : <span className="text-gray-400 italic">Not available</span>}
         </div>
       )}
       {isInvalid && isEditing && (
-        <span className="text-xs text-red-600">This field is required</span>
+        <span className="text-xs text-red-500 font-medium ml-1">This field is required</span>
       )}
     </div>
   );

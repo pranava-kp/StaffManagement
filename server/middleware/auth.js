@@ -1,3 +1,4 @@
+// server\middleware\auth.js
 const jwt = require("jsonwebtoken");
 const User = require("../model/user");
 const BlacklistedToken = require("../model/BlacklistedToken"); // Add this line
@@ -55,47 +56,6 @@ exports.auth = async (req, res, next) => {
     });
   }
 };
-
-// Enhanced logout function with token blacklisting
-exports.logout = async (req, res) => {
-  try {
-    // Extract token from request
-    const token = req.cookies.token || 
-                 req.header("Authorization")?.replace("Bearer ", "") || 
-                 req.body.token;
-
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: 'No token provided'
-      });
-    }
-
-    // Add token to blacklist
-    const blacklistedToken = new BlacklistedToken({ token });
-    await blacklistedToken.save();
-
-    // Clear the cookie
-    res.clearCookie('token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/'
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: 'Logged out successfully'
-    });
-  } catch (err) {
-    console.error('Logout error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Logout failed'
-    });
-  }
-};
-
 
 const checkRole = (role) => async (req, res, next) => {
   try {

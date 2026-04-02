@@ -16,11 +16,23 @@ const DashboardNavbar = ({ setSidebarOpen, menuOpen, setMenuOpen }) => {
         setSidebarOpen(prev => !prev);
     };
 
-    const logOutHandler = () => {
-        localStorage.removeItem("token");
-        dispatch(setToken(null));
-        toast.success("Logged out successfully");
-        navigate('/login');
+    const logOutHandler = async () => {
+        try {
+            await fetch("http://localhost:2000/api/v1/logout", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+        } catch (error) {
+            console.error("Logout API call failed:", error);
+        } finally {
+            localStorage.removeItem("token");
+            dispatch(setToken(null));
+            toast.success("Logged out successfully");
+            navigate('/login');
+        }
     };
 
     return (

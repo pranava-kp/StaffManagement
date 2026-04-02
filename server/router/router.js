@@ -4,7 +4,7 @@ const router = express.Router();
 // Import controllers
 const { signup } = require("../controller/signup");
 const { login } = require("../controller/login");
-const { 
+const {
     logout,
     generateOTP,
     verifyOTP,
@@ -13,14 +13,15 @@ const {
 } = require("../controller/auth");
 const { auth, isStaff, isHOD, isPrincipal, allowRoles } = require("../middleware/auth");
 const { imageUpload, getAllFiles } = require("../controller/File");
-const { createLeave, getAllUserLeaves, updateLeaveStatus } = require("../controller/Leave");
-const { getAllUsers } = require("../controller/User");
-const { 
-    getMyProfile, 
-    updateOwnProfile, 
+const { createLeave, getAllUserLeaves, updateLeaveStatus, editLeave } = require("../controller/Leave");
+const { getAllUsers, getuserdept } = require("../controller/User");
+const {
+    getMyProfile,
+    updateOwnProfile,
     adminUpdateProfile,
     deleteProfile,
-    getProfileByEmail
+    getProfileByEmail,
+    getRemainingLeaves
 } = require("../controller/Profile");
 const { addStaff } = require("../controller/addStaff");
 
@@ -41,19 +42,23 @@ router.get("/getAllimage", getAllFiles);
 
 // LEAVE ROUTES
 router.post("/createLeave", auth, allowRoles(["Staff", "HOD"]), createLeave);
+router.put("/edit-leave", auth, allowRoles(["Staff", "HOD"]), editLeave);
 // Update the leave routes section to:
 router.get("/get-all-leaves", auth, allowRoles(["Staff", "HOD", "Principal"]), getAllUserLeaves);
 // Change the route to a simple POST endpoint
-router.post("/update-leave-status", 
-    auth, 
-    allowRoles(["HOD", "Principal"]), 
+router.post("/update-leave-status",
+    auth,
+    allowRoles(["HOD", "Principal"]),
     updateLeaveStatus
 );
+
+router.get("/get-remaining-leaves", auth, getRemainingLeaves);
 
 // USER ROUTES
 router.get("/profile", auth, getMyProfile);
 router.get("/profile-by-email", auth, allowRoles(["Principal", "Admin", "HOD"]), getProfileByEmail);
 router.get("/getAllUser", auth, allowRoles(["HOD", "Admin", "Principal"]), getAllUsers);
+router.get("/getuserdept", auth, getuserdept);
 router.patch("/update-own-profile", auth, updateOwnProfile);
 router.patch("/admin-update-profile", auth, allowRoles(["Admin", "Principal"]), adminUpdateProfile);
 router.post("/add-user", auth, allowRoles(["Admin", "Principal", "HOD"]), addStaff);

@@ -8,7 +8,7 @@ const leaveSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        // enum: ["Emergency Leave", "Casual Leave", "Other"],
+        enum: ["Casual Leave", "Earned Leave", "Maternity Leave", "Restricted Holiday"],
         required: true,
     },
     subject: {
@@ -21,8 +21,15 @@ const leaveSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["Pending", "Approved", "Rejected"],
-        default: "Pending",
+        enum: [
+            "Awaiting HOD Approval",
+            "Awaiting Principal Approval",
+            "Approved",
+            "Rejected by HOD",
+            "Rejected by Principal",
+            
+        ],
+        default: "Awaiting HOD Approval",
     },
     startDate:{
         type: Date,
@@ -40,6 +47,24 @@ const leaveSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-});
+    documentUrl: {
+        type: String, // Stores the Cloudinary secure_url
+        default: "",
+    },
+    substituteTeachers: {
+        type: mongoose.Schema.Types.Mixed, 
+        required: true,
+    },
+    //comments array
+    comments: [
+        {
+            role: { type: String },
+            action: { type: String },
+            commentText: { type: String },
+            timestamp: { type: Date, default: Date.now }
+        }
+    ],
+    
+}, { timestamps: true });
 
 module.exports = mongoose.model("Leave", leaveSchema);

@@ -21,7 +21,8 @@ export const imageDetails = {
 export const leaveEndpoints = {
     CREATE_LEAVE: BASE_URL + "/createLeave",
     GET_ALL_USER_LEAVES: BASE_URL + "/get-all-leaves",
-    GRANT_USER_LEAVE:BASE_URL+"/update-leave-status"
+    GRANT_USER_LEAVE:BASE_URL+"/update-leave-status",
+    GET_REMAINING_LEAVES: BASE_URL + "/get-remaining-leaves",
 }
 
 export const userEndpoints = {

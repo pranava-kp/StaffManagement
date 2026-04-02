@@ -1,3 +1,4 @@
+// server\controller\auth.js
 const User = require('../model/user');
 const OTP = require('../model/otpModel');
 const mailSender = require('../mail/sender');

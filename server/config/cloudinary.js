@@ -1,18 +1,16 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 require("dotenv").config();
-const name=process.env.cloudname;
-const key=process.env.clouAPI;
-const secret=process.env.api_secret;
-exports.cloudinaryConfig = () => {
 
-    try{
+exports.cloudinaryConfig = () => {
+    try {
         cloudinary.config({
-            cloud_name: name,
-            api_key: key,
-            api_secret: secret,
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
         });
+        console.log("Cloudinary connected successfully");
+    } catch (error) {
+        console.log("Issue connecting to Cloudinary");
+        console.error(error);
     }
-    catch(err){
-        console.log(err);
-    }
-}
+};

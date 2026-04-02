@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-// import { toast } from "react-hot-toast";
 import ConfirmationModal from "./ConfirmationModal";
+
 const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcessLeave, isProcessing }) => {
-  const [rejectionReason, setRejectionReason] = useState("");
+  const [comment, setComment] = useState("");
   const [showRejectionConfirmation, setShowRejectionConfirmation] = useState(false);
+
   if (!isOpen || !leave) return null;
 
   const handleRejectClick = () => {
@@ -11,19 +12,17 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
   };
 
   const handleConfirmReject = () => {
-    // console.log("handleConfirmReject called", { leave, rejectionReason, isProcessing });
-    onProcessLeave(leave, "reject", rejectionReason || "", true); // Pass true for fromDetailsModal
+    onProcessLeave(leave, "reject", comment || "", true); 
     setShowRejectionConfirmation(false);
-    setRejectionReason("");
+    setComment("");
   };
 
   const handleCancelRejectConfirmation = () => {
     setShowRejectionConfirmation(false);
-    setRejectionReason("");
   };
 
   const handleApproveClick = () => {
-    onProcessLeave(leave, "approve");
+    onProcessLeave(leave, "approve", comment || "", true);
     onClose();
   };
 
@@ -48,36 +47,89 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
           {leave.user && (
             <p><strong>Applied By:</strong> {leave.user.firstName} {leave.user.lastName} ({leave.user.department})</p>
           )}
-          <p><strong>Status:</strong> <span className={`font-bold ${leave.status === "Pending" ? "text-yellow-600" :
-            leave.status === "Approved" ? "text-green-600" :
-              "text-red-600"
-            }`}>{leave.status}</span></p>
+          <p>
+            <strong>Status:</strong>{" "}
+            {/* Added your HOD/Principal statuses to the Yellow text color! */}
+            <span className={`font-bold ${
+              ["Pending", "Awaiting HOD Approval", "Awaiting Principal Approval"].includes(leave.status) ? "text-yellow-600" :
+              leave.status === "Approved" ? "text-green-600" : "text-red-600"
+            }`}>
+              {leave.status}
+            </span>
+          </p>
           <p><strong>Category:</strong> {leave.category}</p>
           <p><strong>From:</strong> {new Date(leave.startDate).toLocaleDateString('en-GB')}</p>
           <p><strong>To:</strong> {new Date(leave.endDate).toLocaleDateString('en-GB')}</p>
           <p><strong>Description:</strong> {leave.body}</p>
-          {leave.rejectionReason && <p><strong>Rejection Reason:</strong> {leave.rejectionReason}</p>}
+
+          {/* --- NEW: COMMENTS AUDIT TRAIL (100% Crash Proof) --- */}
+          {leave?.comments && Array.isArray(leave.comments) && leave.comments.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h3 className="font-semibold text-gray-800 mb-2">Comments:</h3>
+              <div className="flex flex-col gap-3">
+                {leave.comments.map((c, index) => {
+                  const actionColor = c.action === 'Approved' ? 'text-green-600' : 'text-red-600';
+                  return (
+                    <div key={index} className="bg-white p-3 rounded-md text-sm border border-gray-100 shadow-sm">
+                      {/* 1. Role and Status */}
+                      <p className="text-gray-800 m-0 mb-1">
+                        <strong>{c.role}:</strong> <span className={`font-semibold ${actionColor}`}>{c.action}</span>
+                      </p>
+                      
+                      {/* 2. The Comment Text (Normal text, no italics) */}
+                      {c.commentText && c.commentText.trim() !== "" && (
+                        <p className="text-gray-800 m-0 mb-1">
+                          "{c.commentText}"
+                        </p>
+                      )}
+
+                      {/* 3. The Timestamp */}
+                      <p className="text-xs text-gray-400 m-0">
+                        On {new Date(c.timestamp).toLocaleDateString('en-GB')} at {new Date(c.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        {leave.status === "Pending" && canApproveReject && (
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              onClick={handleApproveClick}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+        {/* --- NEW: COMMENT INPUT BOX --- */}
+        {["Pending", "Awaiting HOD Approval", "Awaiting Principal Approval"].includes(leave.status) && canApproveReject && (
+          <div className="mt-5 border-t border-gray-200 pt-4">
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Add a Comment (Optional):
+            </label>
+            <textarea
+              placeholder="Type your comment or reason here..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+              rows="2"
               disabled={isProcessing}
-            >
-              Approve
-            </button>
-            <button
-              onClick={handleRejectClick}
-              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-              disabled={isProcessing}
-            >
-              Reject
-            </button>
+            />
+            
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={handleApproveClick}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                disabled={isProcessing}
+              >
+                Approve
+              </button>
+              <button
+                onClick={handleRejectClick}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                disabled={isProcessing}
+              >
+                Reject
+              </button>
+            </div>
           </div>
         )}
 
+        {/* Rejection Confirmation Pop-up */}
         {showRejectionConfirmation && (
           <ConfirmationModal
             isOpen={showRejectionConfirmation}
@@ -87,8 +139,8 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
                 <p>Are you sure you want to reject this leave request?</p>
                 <textarea
                   placeholder="Reason for rejection (optional)"
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
                   className="w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                   rows="3"
                   disabled={isProcessing}
@@ -98,7 +150,7 @@ const LeaveDetailsModal = ({ isOpen, onClose, leave, canApproveReject, onProcess
             btn1Text="Cancel"
             btn2Text="Confirm Reject"
             btn1Handler={handleCancelRejectConfirmation}
-            btn2Handler={handleConfirmReject}  // Remove the arrow function here
+            btn2Handler={handleConfirmReject}
             isProcessing={isProcessing}
           />
         )}

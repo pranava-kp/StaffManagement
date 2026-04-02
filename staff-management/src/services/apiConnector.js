@@ -10,8 +10,9 @@ export const apiConnector = (method, url, bodyData, headers, params) => {
     method,
     url,
     data: bodyData || null,
-    headers: {
-      "Content-Type": "application/json", // Default headers
+    // If bodyData is FormData, let Axios handle the Content-Type automatically
+    headers: bodyData instanceof FormData ? { ...headers } : {
+      "Content-Type": "application/json", // Default headers for normal requests
       ...headers, // Merge custom headers
     },
     params: params || null,

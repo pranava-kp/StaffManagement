@@ -1,6 +1,5 @@
 
-
-exports.becameSubstituteTeacher = (startDate, dayToAdd, name, absentTeacherName) => {
+exports.becameSubstituteTeacher = (startDate, dayToAdd, name, absentTeacherName, hour) => {
 
     const dateString = startDate; // Last day of May
 
@@ -83,7 +82,7 @@ exports.becameSubstituteTeacher = (startDate, dayToAdd, name, absentTeacherName)
             <div class="message">Assignment as substitute teacher</div>
             <div class="body">
                 <p>Hey ${name}</p>
-                <p>You've been assisgned as substitute teacher on <span class="highlight"> ${newDateString}</span>.
+                <p>You've been assigned as substitute teacher on <span class="highlight">${newDateString}</span> for <span class="highlight">Hour ${hour}</span>.
                 </p>
                 <p>Please contact ${absentTeacherName} for further information.</p>
             </div>

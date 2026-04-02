@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
-
+//comment
 // Reusable transporter configuration
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,

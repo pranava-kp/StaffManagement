@@ -4,6 +4,7 @@ const Profile = require("../model/profile");
 const User = require("../model/user");
 const File = require("../model/file");
 const { uploadFileToCloudinary } = require("../utils/fileUploader");
+const moment = require("moment");
 
 //Updating Profile info
 const jwt = require("jsonwebtoken");
@@ -408,4 +409,82 @@ exports.getProfileByEmail = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+// Helper to get working days
+const getWorkingDays = (startDate, endDate) => {
+    let count = 0;
+    let current = moment(startDate).startOf('day');
+    const end = moment(endDate).startOf('day');
+    
+    while (current.isSameOrBefore(end)) {
+        if (current.day() !== 0) { // 0 is Sunday
+            count++;
+        }
+        current.add(1, 'days');
+    }
+    return count;
+};
+
+exports.getRemainingLeaves = async (req, res) => {
+    try {
+        const userId = req.user.id || req.user._id;
+        const profile = await User.findById(userId);
+        
+        if (!profile) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const startOfYear = moment().startOf('year').toDate();
+        const endOfYear = moment().endOf('year').toDate();
+        
+        const existingLeaves = await Leave.find({
+            user: userId,
+            status: { $nin: ['Rejected by HOD', 'Rejected by Principal', 'Rejected'] },
+            startDate: { $gte: startOfYear, $lte: endOfYear }
+        });
+
+        let casualThisYear = 0;
+        let casualThisMonth = 0;
+        let restrictedThisYear = 0;
+        let maternityThisYear = 0;
+
+        existingLeaves.forEach(l => {
+            const days = getWorkingDays(moment(l.startDate), moment(l.endDate));
+            
+            if (l.category === 'Casual Leave') {
+                casualThisYear += days;
+                if (moment(l.startDate).isSame(moment(), 'month')) {
+                    casualThisMonth += days;
+                }
+            } else if (l.category === 'Restricted Holiday') {
+                restrictedThisYear += days;
+            } else if (l.category === 'Maternity Leave') {
+                maternityThisYear += days;
+            }
+        });
+
+        const casualLeaveRemaining = Math.max(0, 12 - casualThisYear);
+        const earnedLeaveRemaining = profile.leaveBalances?.earnedLeave?.balance ?? 10;
+        const maternityLeaveRemaining = Math.max(0, 180 - maternityThisYear);
+        const restrictedHolidayRemaining = Math.max(0, 2 - restrictedThisYear);
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                "Casual Leave": casualLeaveRemaining,
+                "Earned Leave": earnedLeaveRemaining,
+                "Maternity Leave": maternityLeaveRemaining,
+                "Restricted Holiday": restrictedHolidayRemaining
+            }
+        });
+
+    } catch (err) {
+        console.error("Get remaining leaves error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch remaining leaves",
+            error: err.message
+        });
+    }
 };

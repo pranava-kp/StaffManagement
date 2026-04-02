@@ -57,8 +57,25 @@ const userSchema = new mongoose.Schema(
         employeeId: {
             type: String,
             default: null
+        },
+        leaveBalances: {
+            casualLeave: {
+                takenThisYear: { type: Number, default: 0 }, 
+            },
+            earnedLeave: {
+                balance: { type: Number, default: 10 }, 
+                takenThisYear: { type: Number, default: 0 }
+            },
+            maternityLeave: {
+                takenInDays: { type: Number, default: 0 }, 
+                isApprovedByOfficer: { type: Boolean, default: false }
+            },
+            restrictedHoliday: {
+                takenThisYear: { type: Number, default: 0 }
+            }
         }
     },
+    
     { timestamps: true }
 );
 
